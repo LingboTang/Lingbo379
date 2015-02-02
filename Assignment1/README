@@ -1,0 +1,25 @@
+
+CMPUT379 Assignment 1
+
+File: README
+
+Author: Lingbo Tang
+
+Student ID: 1353070
+
+
+
+
+This is the Assignment about handle the signal and scan the virtual memory.
+
+Four core file is needed:
+	1.memchunk.c (Countains the main function)
+	2.memchunk.h (Countains all function prototype and global variables)
+	3.testmem.c (Added one testcase)
+	4.Makefile (compile script)
+
+
+In this assignment I didn't write the command line to handle input variables
+Therefore, to change the testsize and other info, just go to the testmem and chang it.
+If you want to run the program: simply type 'make' in the terminal and then type ./testmem
+If you want to delete the bin files: simply type 'make clean' and it will excute.
