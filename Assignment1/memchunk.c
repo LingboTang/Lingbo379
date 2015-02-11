@@ -110,7 +110,7 @@ int get_mem_layout (struct memchunk *chunk_list, int size) {
 				/*And we need check if the currect chunk
 				 *has been readed or not. If is, then jump.
 				 */
-
+				chunk_list[counter].RW = -1;
 				if (this)
 				{
 					this = 0;
