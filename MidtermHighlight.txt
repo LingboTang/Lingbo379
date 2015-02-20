@@ -93,4 +93,22 @@ Multilevel Feedback Queue Scheduling
 		> Method used to determine when to demote a process
 
 
+Queueing Models
+	
+	# n = average queue length, W = average waiting time in queue, lambda = average arrival rate into queue
+	
+	> Little's law - in stead state, processes leaving queue must equal processes arriving, thus: n = lambda * W
+		> Valid for any scheduling algorithm and arrival distribution
+	> Queueing models make some independent assumption to define its parameters.
+		> May not be valid in most cases
+		> Outcome is questionable
 
+Simulations are more accurate
+
+Pull Migration: idle CPU pulls a task from elsewhere or
+Push Migration: specific task periodically checks load and moves processes
+
+Processor affinity: Process wants to stay on same processor because recent variables all are stored in local cache
+
+	> has to repopulate on new processor
+	
