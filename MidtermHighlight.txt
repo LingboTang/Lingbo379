@@ -1,0 +1,62 @@
+Types of scheduler:
+Short-term scheduler (or CPU scheduler) - selects a process residing in main memory for allocating the CPU. May be preemptive or non-preemptive
+	> NPS,current process runs until it block (waiting for an event or a resouce) or it terminates
+	> PS, currently active process may be suspended and CPU is allocated to another process
+Long-term scheduler (or job scheduler) - selects and moves a process from disk to ready queue in main memory.
+	> Controls the degree of multiprogramming
+	> Strives for good process mix of I/O-bound and CPU-bound processes
+Medium-term scheduler suspends or resumes processes by swapping (rolling) them out of or into memory.
+
+What's the shortage of using SJF(Shortest Job first) algorithm in CPU scheduling? > We have to know the length of each process, and sometimes we might not know if a short process must follow a long process
+
+How to show the shceduling chart? 
+	> Represent each of the process in bar chart number the time interval
+	> note that for the first appeared process, the waiting time is zero.
+
+
+Length of Next CPU Burst
+	> Can only estimate the length - should  be similar to the previoius one.
+		> Previous burst length is used in decision making
+
+	> Exponential average of all previous CPU bursts.
+		> Look at the Latex file (Similar to the N-armed bandit)
+	> Commonly , \alpha set to 1/2
+
+Shortest-remaining-time-first
+
+	> Preemptive version of SJF
+	> Now we add the concepts of varying arrival times and preemption to the analysis
+		Process		Arrival Time 	Burst Time
+		P1		0		8
+		P2		1		4
+		P3		2		9
+		P4		3		5
+
+
+Priority Scheduling
+
+	> A priority number is associated with each process
+		> Internal (process attributes)
+		> External (characteristics not related to OS)
+	> The CPU is allocated to the process with the highest priority
+		( smallest integer => highest priority, not true for all systems)
+		> Preemptive
+		> Non-preemptive
+	> FCFS & SJF are priority scheduling. In FCFS, the process that comes earlier has higher priority. In SJF, priority is the inverse of predicted next CPU burst time
+	
+	> PRONLEM!!!!: Starvation - low priority processes may never execute
+		> SOLUTION!!!!: Aging -as time passes increase the priority of the process
+	Note ch06.pdf page 20!!!!!
+
+Round Robin (RR)
+
+	> Designed specially for time-sharing systems
+	> Each process gets a small unit of CPU time (time slice or time quantum q), usually 10-100 ms
+	> If n processes in the ready queue, each process gets at most q time units at once. No process waits more than (n-1) q time units.
+
+	> Timer interrupts every quantum to schedule next process
+	> Performance depends on time quantum (q)
+		> q large => RR becomes FCFS
+		> q small => context switching (< 10 us) overhead would be high
+		> Rule of thumb: 80% CPU bursts should be smaller than q
+	
