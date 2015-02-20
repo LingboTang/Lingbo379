@@ -59,4 +59,38 @@ Round Robin (RR)
 		> q large => RR becomes FCFS
 		> q small => context switching (< 10 us) overhead would be high
 		> Rule of thumb: 80% CPU bursts should be smaller than q
+
+
+Some rules of thumb:
+	> FCFS performs better for long processes and favours CPU-bound jobs
+	> FCFS not suitable for interactive jobs
+	> RR not suitalbe for batch jobs 
+	> SJF long processes may suffer CPU starvation
+	> Overhead negligible in FCFS, moderate in RR and higher in SJF
+
+Scheduling Different Process Types
+
+	> There is no single solution
+		> Multi-level scheduling - separate queues for different process types
+		> Multi-level feedback queue scheduling - more flexible variant of multilevel queue scheduling
+
+Multilevel Queue Scheduling
+	> Natural separation between foreground and background jobs, since have separate queues
+	> Can take advantage of simple scheduling algorithms, since know what types of processes will be in each queue
+	> Disadvantages
+		> Some overhead to maintain different queues ( which might be offset by the fact that each queue is now shorter)
+		> Fixed queue each process - what to do if a process has varied properties
+
+Multilevel Feedback Queue Scheduling
 	
+	> A process can move among various queues based on current properties
+		> Aging can be implemented this way
+	> Multilevel-feedback-queue scheduler has some parameters:
+		> Number of queues
+		> Scheduling algorithm for each queue
+		> Method to initially assign a process to a queue
+		> Method used to determine when to upgrade a process
+		> Method used to determine when to demote a process
+
+
+
