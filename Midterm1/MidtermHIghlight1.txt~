@@ -1,0 +1,27 @@
+a) Describe three advantages and one disadvatage of Multiprocessor System over Single Processor Systems
+
+	Advantages: 
+		Increased throughput. By increasing the number of processors, we expect to get more work done in less time. The speed-up with N processors is not N, however; rahter, it is less than N.
+
+		Economy of scale. Multiprocessor systems can cost less than equivalent multiple single-processor systems, because they can share peripherals, mass storage, and power supplies
+
+		Increased reliability. If functions can be distributed properly among several processors, then the failure of one processor will not halt the system, only slow it donw.
+
+	Disadvantage:
+		Data consistency. In multiprocessor environments, it is hard to maintain data consistency. Multiple copies of the same data may reside in the local storage of each CPU. Whenever one CPU alters the data,it is necessary to reflect the update operation on each copy of the data.
+
+b) Write the difference between API and System Call. What are the benefits of using API rather than using direct system call?
+	System calls are programming interfaces to the services provided by the OS whereas an API provides application programmers with an interface to a system call. API invokes the actual system call on behalf of the application programmer. API hides the complexity of the actual system call and also improves the portability of the written code.
+
+c)Describe five different states that a process may have
+	The possible states of a process are: new running waiting ready and terminated. The process is created while in the new state. In the running and waiting state, the process is executing or waiting for an event to occur, respectively. The ready state occurs when the process is ready and waiting to be assigned to a processor and should not be confused with the waiting state mentioned earlier. After the process is finished executing its code, it enters the termination state.
+
+d) Write relative advantages and disadvantage of shared memory and message passing communication systems.
+
+	Message passing is useful for exchanging smaller amounts of data, because no conflicts need be avoided. Message passing is also easier to implement in a distributed system than shared memory.
+
+	Shared memory can be faster than message passing since message-passing sytstems are typically implemented using system calls and thus require the more time-consuming task of kernel intervention. In shared-memory systems, system calls are required only to establish shared memory regions. Once shared memory is established, all accesses are treated as routine memory accesses, and no assistance from the kernel is required.
+
+	Shared memory sufferes from cahe coherency issues, which arise because shared data migrate among the several caches.
+
+e)
