@@ -106,21 +106,4 @@ Multithreading models
 			Number of threads sometimes restricted due to overhead			
 		Many-to-Many
 			Allows the operating system to create a sufficient number of kernel threads
-		Two-level Model
-			Similar to MM, except that it allows a user thread to b3e bound to a kernel thread
-			Examples: IPIX HP-UX Tru64 UNIX Solaris 8 and earlier
 
-Thread Libraries
-		Thread Library provides programmer with API for creating and managing threads
-
-Two primary ways of implementing
-		Library entirely in user space
-		Kernel-level library supported by the OS
-
-Pthreads
-		May be provided either as user-level or kernel-level
-		A POSIX standard API for thread creation and synchronization
-		Specification, not implementation
-		API specifies behavior of the thread library, implementation is up to development of the library
-		Common in UNIX operating systems (Solaris, Linux, Mac OS X)
-		
