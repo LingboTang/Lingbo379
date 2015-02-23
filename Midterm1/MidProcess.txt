@@ -121,3 +121,26 @@ Indirect Communication
 		A link may be associated with many processes
 		Each pair of processes may share several communication links
 		Link may be unidirectional or bi-directional
+
+Synchronization
+	
+	Message passing may be either blocking or non-blocking
+	Blocking is considered sysnchronous
+		* Blocking send -- ther sender is blocked until the message is received
+		* Blocking receive -- the receiver is blocked until a message is available
+	Non-blocking is considered asynchronous
+		* Non-blocking send -- the sender sends the message and continue
+		* Non-blocking receive -- the receiver receives:
+			* A valid message, or
+			* Null messgae
+	If both send and receive are blocking, it is called a rendezvous
+
+Buffering
+	
+	Message queues are attached to the link (D or inD coommunication)
+	Queues implemented in one of three ways
+		1. Zero capacity - no messages are queued on a link. Sender must wait for receiver (rendezvous)
+		2. Bounded capacity -finite length of n messages. Sneder must4 wait if link full
+		3. Unbounded capacity - inifinite length. Sender never waits
+
+

@@ -104,3 +104,28 @@ Direct Communication
 		* listen(ID, message) - Receive a pending (posted) message
 	Properties of direct communication link
 		* Links are established automatically
+		* Exactly one link is associated with exactly one pair of processes
+		* The link may unidirectional or bi-directional
+
+Indirect Communication
+	
+	Messages sent to and retrieved from mailboxes
+		Each mailbox has a unique id
+		Processes can communicate if they share a mailbox
+		send(A, message) — Send message to mailbox A
+		receive(A, message) — Receive message from mailbox A
+	Decouples sender and receiver, which is more flexible
+	Usually mailbox associated with many senders/receivers; if only one receiver attached with a particular mailbox, then that mailbox is often called a port
+	Properties of indirect communication link
+		A link established if processes share a common mailbox
+		A link may be associated with many processes
+		Each pair of processes may share several communication links
+		Link may be unidirectional or bi-directional
+
+Synchronization
+	
+	Message passing may be either blocking or non-blocking
+	Blocking is considered sysnchronous
+		* Blocking send -- ther sender is blocked until the message is received
+		* Blocking receive -- the receiver is blocked until a message is available
+	
