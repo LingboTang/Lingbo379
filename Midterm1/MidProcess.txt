@@ -1,0 +1,123 @@
+Features of processes - scheduling, creation and termination
+
+Exploring interprocess communication (IPC)
+
+Process - Execution progresses in sequential fashion
+
+One program - Several processes - shared by several users
+
+Process Control Block (PCB)
+
+Information associated with each process (also called task control block)
+	Process state - running, waiting, etc
+	Program counter - location of next instruction to be executed
+	CPU registers
+	CPU Scheduling information priority, position in process queue
+	Information about allocated memory
+	Accounting information -process number (pid), CPU time used
+	I/O status information - allocated I/O devices, list of open files
+
+Threads
+	MT -> perform multiple tasks concurrently
+		Beneficial on multi-core systems
+		Multiple program counters
+		PCB contains additional info for each thread
+
+Process Scheduling
+	Multiprogramming - CPU switches among processes
+	Process scheduler selects next process for CPU
+	Different queues of processes are maintained
+		Job queue - set of all processes in the system
+		Ready queue - set of all processes residing in main memory, ready and waiting to execute
+		Device queue - set of processes waiting for a device
+	Processes migrate among the various queues
+
+Context Switching
+	When running process waits --> CPU switches to another process
+	Save the state of the old process and load the saved state of the new process: context switching
+	Context of a process represented in the PCB
+	Context-switch time is over head
+		The more complex the OS and the PCB -> longer the switching time
+		Some hardware provides multiple sets of registers -> multiple contexts loaded at once
+
+Parent process creates child processes
+	Process is identified by a process identifier (pid)
+	Resource sharing options
+	Parent and children share all resources
+	Children share subset of parent’s resources
+	Parent and child share no resources
+	Execution options
+	Parent and children execute concurrently
+	Parent waits until children terminate
+
+Unix System Initialization
+	swapper
+		A kernel process
+		No program on disk corresponds to this process
+	Init
+		Invoked by the kernel after bootstrapping
+		Does system-dependent initialization
+		Can be found at /sbin (depends on version)
+		User process running with superuser privileges
+
+Process Termination
+	May terminate normally or unexpectedly
+		Status data returned from child to parent (via wait())
+		Allocated resources are released by OS
+		Normal termination using the exit() system call
+		Unexepected termination due to error
+	Parent terminates a child using the abort() system call
+		Child has exceeded allocated resources
+		Task assigned to child is no longer required
+		The parent is exiting and OS does not allow a child to continue if its parent terminates -> may result cascading termination
+		Cascading termination may be initiated by OS
+
+Process Termination
+	Parent process may wait for termination of a child by using the wait()system call. The call returns status information and the
+	pid of the terminated processpid = wait(&status);
+	Zombie process – a child process that terminated but its parent has not call wait() yet
+	Orphan process – a child process whose parent terminated: init process (pid = 1) becomes parent.
+
+
+Interprocess Communication
+	Processes may be independent or cooperating
+	Cooperation initiated by interprocess communication (IPC)
+	Reasons for Coop:
+		Information sharing - several users may require same piece of information
+		Computation speedup - a task can broken into subtasks which execute in parallel
+		Modularity - construct system in modular fashion, to promote writing, understanding and testing the system`1 
+		Convenience - processes can decide what to communicate with minimal risk
+	
+	Two models of IPC
+		Shared memory – faster, convenient for large amount of data,system call only during creation & termination
+		Message passing – slower due to repetitive system call, convenient for small amount of data
+	Signals (in UNIX) offer bare form of communication
+
+
+Direct Communication
+
+	Processes must name each other explicitly (symmetric addressing)
+		* send (P, message) send a meesage to process P
+		* receive(Q, message) - receive a message from process Q
+	In a client-server system, server does not know the nmae of a specific client in order to receive a message; use asymmetric addressing
+		* send(P, message) - Sender still needs to know recipient process
+		* listen(ID, message) - Receive a pending (posted) message
+	Properties of direct communication link
+		* Links are established automatically
+		* Exactly one link is associated with exactly one pair of processes
+		* The link may unidirectional or bi-directional
+
+Indirect Communication
+	
+	Messages sent to and retrieved from mailboxes
+		Each mailbox has a unique id
+		Processes can communicate if they share a mailbox
+		send(A, message) — Send message to mailbox A
+		receive(A, message) — Receive message from mailbox A
+	Decouples sender and receiver, which is more flexible
+	Usually mailbox associated with many senders/receivers; if only one receiver attached with a particular mailbox, then that mailbox is often called a port
+	Properties of indirect communication link
+		A link established if processes share a common mailbox
+		A link may be associated with many processes
+		Each pair of processes may share several communication links
+		Link may be unidirectional or bi-directional
