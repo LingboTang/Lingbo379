@@ -12,6 +12,65 @@
 #define PORT 9931
 #define IP 2130706433  /* 127.0.0.1 */
 
+
+int main(int argc, char *argv[])
+{
+	File* packagedat;
+	i_flag = 0;
+	char * filename = NULL;
+	extern char * optarg;
+	extern int optopt;
+	while ((command = getopt(argc,argv,"-t:g:f:i")) != -1)
+	{
+		switch (command)
+		{
+			case 'g':
+				acceleration = atof(optarg);
+				break;
+			case 't':
+				thrust = atof(optarg);
+				break;
+			case 'f':
+				filename = optarg;
+				break;
+			case 'i':
+				i_flag = 1;
+				break;
+			case '?':
+				if (optopt == 'f')
+				{
+					fprintf(stderr,"Option -%c requires an argument.\n",optopt);
+				}
+				else if (isprint(optopt))
+				{
+					fprintf(stderr,"Unknown option ---%c.\n",optopt);
+				}
+				else
+				{
+					fprintf(stderr,"Unknown option character make no sense '\\x%x'.\n",optopt);
+				}
+				return 1;
+			default:
+				abort();
+		}
+		if (acceleration < 0)
+		{
+			printf("Acceleration should be a positive number \n");
+			exit(1);
+		}
+		if (thrust <-20|| thrust >0)
+		{
+			printf("Thrust should be in the interval of (-20,0) \n");
+			exit(1);
+		}
+	}
+}
+
+
+
+
+
+
 int main( int argc, char ** argv)
 {
 	struct sockaddr_in si_me, si_other;
