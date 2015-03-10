@@ -56,43 +56,61 @@ char* itoa(int i, char b[]){
 }
 
 char* random_IP(char * string,size_t length)
-{
+{	
 	srand(time(NULL));
-	int r;
-	char* newstr = (char*)malloc(strlen(string));
-	for (int i =0;i<4; i++)
+	struct IP_address *address_list;
+	address_list = malloc(sizeof(struct IP_address) * 4);
+	int i;
+	char string2[4],string3[4],string4[4];
+	for (i=0; i<5; i++)
 	{
-		r = rand() % (255-0+1)+0;
-		string = itoa(r,string);
-	    strcpy(newstr,string);
-		char*str3 = (char *)malloc(1+strlen(string)+strlen(newstr));
-		strcat(str3,newstr); 		
+		address_list[i].ip = rand()% (255-0+1)+0;
 	}
+    char* token1 = itoa(address_list[1].ip,string);
+	char* token2 = itoa(address_list[2].ip,string2);
+	char* token3 = itoa(address_list[3].ip,string3);
+	char* token4 = itoa(address_list[4].ip,string4);
+	char* token5 = ".";
+	char* IP = (char*)malloc(16);
+	strcpy(IP,token1);
+	strcat(IP,token5);
+	strcat(IP,token2);
+	strcat(IP,token5);
+	strcat(IP,token3);
+	strcat(IP,token5);
+	strcat(IP,token4);
+	return IP;
 }
 
-/*
-int main(int argc, char** argv) {
+int randomTTL() {
+	srand(time(NULL));
+	int r;
+	int M = 1;
+	int N = 4;
+    
+    r = rand();
+	r = r % (4 - 1 + 1) + 1;
+	return r;
+}
 
-      char* str1;
-      char* str2;
-      str1 = "sssss";
-      str2 = "kkkk";
-      char * str3 = (char *) malloc(1 + strlen(str1)+ strlen(str2) );
-      strcpy(str3, str1);
-      strcat(str3, str2);
-      printf("%s", str3);
-
-      return 0;
- }*/
 
 int main(void)
 {
-  char s[20];
-  random_payload(s, 20);  
-  printf("%s\n", s);
-  char bufferIP[4];
-  char* realIP;
-  realIP = random_IP(bufferIP, 4);
-  printf("%s\n", realIP);	  
+  int Packet_ID=0;
+  while (1)
+  {
+	  Packet_ID++;
+	  printf("\nPacket_ID: %d\n",Packet_ID);
+	  char s[20];
+	  int TTL;
+	  TTL = randomTTL();
+	  printf("\nTTL: %d\n",TTL);
+	  random_payload(s, 20);  
+	  printf("\npayload: %s\n", s);
+	  char bufferIP[4];
+	  char* realIP;
+	  realIP = random_IP(bufferIP, 4);
+	  printf("\nIP: %s\n", realIP);
+  }	  
   return 0;
 }

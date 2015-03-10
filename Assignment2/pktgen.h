@@ -14,3 +14,8 @@ struct IP_packet
 	int TTL;
 	char* payload;
 };
+
+struct IP_address
+{
+	int ip;
+};
