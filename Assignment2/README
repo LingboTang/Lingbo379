@@ -4,3 +4,16 @@ How to make it precisely?
 
 and then ./server
 and then ./client
+
+
+5 brief step for myself to do the part a:
+1. Write a function to randomly generate IP in char* (in C, we can use char* to represent the string)
+2. Figure out how to pass the arguement
+3. Figure out how to do the file I/O
+4. Write the package sending and recieving through socket. Build up a struct which contains 
+	int packet id;
+	char* sourceIP;
+	char* destinationIP;
+	int TTL;
+	char* payload;
+5. write this into the statistic file.
