@@ -14,18 +14,18 @@
 
 void random_payload(char * string, size_t length)
 {
-  /* Seed number for rand() */
-  srand((unsigned int) time(0));  
-   
-  /* ASCII characters 33 to 126 */
-  unsigned int num_chars = length - 1;
-  unsigned int i;
-  for (i = 0; i < num_chars; ++i)
+    /* Seed number for rand() */
+    //srand((unsigned int) time(0));  
+     
+    /* ASCII characters 33 to 126 */
+    unsigned int num_chars = length - 1;
+    unsigned int i;
+    for (i = 0; i < num_chars; ++i)
     {
-      string[i] = rand() % (126 - 33 + 1) + 33;
+        string[i] = rand() % (126 - 33 + 1) + 33;
     }
  
-  string[num_chars] = '\0';  
+    string[num_chars] = '\0';  
 }
 
 /*
@@ -57,7 +57,7 @@ char* itoa(int i, char b[]){
 
 char* random_IP(char * string,size_t length)
 {	
-	srand(time(NULL));
+	//srand(time(NULL));
 	struct IP_address *address_list;
 	address_list = malloc(sizeof(struct IP_address) * 4);
 	int i;
@@ -79,15 +79,14 @@ char* random_IP(char * string,size_t length)
 	strcat(IP,token3);
 	strcat(IP,token5);
 	strcat(IP,token4);
+	//free(IP);
+	free(address_list);
 	return IP;
 }
 
 int randomTTL() {
-	srand(time(NULL));
+	//srand(time(NULL));
 	int r;
-	int M = 1;
-	int N = 4;
-    
     r = rand();
 	r = r % (4 - 1 + 1) + 1;
 	return r;
@@ -96,21 +95,37 @@ int randomTTL() {
 
 int main(void)
 {
-  int Packet_ID=0;
-  while (1)
-  {
-	  Packet_ID++;
-	  printf("\nPacket_ID: %d\n",Packet_ID);
-	  char s[20];
-	  int TTL;
-	  TTL = randomTTL();
-	  printf("\nTTL: %d\n",TTL);
-	  random_payload(s, 20);  
-	  printf("\npayload: %s\n", s);
-	  char bufferIP[4];
-	  char* realIP;
-	  realIP = random_IP(bufferIP, 4);
-	  printf("\nIP: %s\n", realIP);
-  }	  
-  return 0;
+	srand((unsigned int) time(0)); 
+    int Packet_ID=0;
+	int thisTTL;
+    while (1)
+	{
+	    Packet_ID++;
+	    char s[20]; 
+	    thisTTL = randomTTL();    
+	    random_payload(s, 20);  	    
+	    char bufferIP[4];
+	    char* source_IP;
+	    source_IP = random_IP(bufferIP, 4);		
+		char bufferIP2[4];
+		char* destination_IP;
+		destination_IP = random_IP(bufferIP2,4);
+		printf("\nPacket_ID: %d\n",Packet_ID);
+		printf("\nsource_IP: %s\n",source_IP);
+	    printf("\ndestination_IP: %s\n", destination_IP);
+		printf("\nTTL: %d\n",thisTTL);
+		printf("\npayload: %s\n", s);
+		struct IP_packet *Package_list;
+		Package_list = malloc(sizeof(struct IP_packet) *20);
+        for (int i = 0; i<20; i++)
+	    {
+		    Package_list[i].packet_id = Packet_ID;
+		    Package_list[i].sourceIP = source_IP;
+			Package_list[i].destinationIP = destination_IP;
+			Package_list[i].TTL = thisTTL;
+			Package_list[i].payload = s;
+		}
+		free(Package_list);
+	}  
+    return 0;
 }
