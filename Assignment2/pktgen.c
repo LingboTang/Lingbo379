@@ -1,75 +1,60 @@
 /* This client sends an integer value encoded as a string to an UDP server, and waits to receive the factorial of that number the Server  */
 
+#include <time.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <signal.h>
+#include <setjmp.h>
+#include <stdlib.h>
+#include "pktgen.h"
 
 #define BUFLEN 512
 #define SERVERPORT 9930
 #define PORT 9931
-#define IP 2130706433  /* 127.0.0.1 */
+//#define IP 2130706433  /* 127.0.0.1 */
 
 
-int main(int argc, char *argv[])
+/* Random generator Referrence
+ * http://ubuntuforums.org/showthread.php?t=1979310 
+ * author: Buffay
+ * Edit date: March 13th, 2012
+ */
+
+void random_payload(char * string, size_t length)
 {
-	File* packagedat;
-	i_flag = 0;
-	char * filename = NULL;
-	extern char * optarg;
-	extern int optopt;
-	while ((command = getopt(argc,argv,"-t:g:f:i")) != -1)
-	{
-		switch (command)
-		{
-			case 'g':
-				acceleration = atof(optarg);
-				break;
-			case 't':
-				thrust = atof(optarg);
-				break;
-			case 'f':
-				filename = optarg;
-				break;
-			case 'i':
-				i_flag = 1;
-				break;
-			case '?':
-				if (optopt == 'f')
-				{
-					fprintf(stderr,"Option -%c requires an argument.\n",optopt);
-				}
-				else if (isprint(optopt))
-				{
-					fprintf(stderr,"Unknown option ---%c.\n",optopt);
-				}
-				else
-				{
-					fprintf(stderr,"Unknown option character make no sense '\\x%x'.\n",optopt);
-				}
-				return 1;
-			default:
-				abort();
-		}
-		if (acceleration < 0)
-		{
-			printf("Acceleration should be a positive number \n");
-			exit(1);
-		}
-		if (thrust <-20|| thrust >0)
-		{
-			printf("Thrust should be in the interval of (-20,0) \n");
-			exit(1);
-		}
-	}
+    /* ASCII characters 33 to 126 */
+    unsigned int num_chars = length - 1;
+    unsigned int i;
+    for (i = 0; i < num_chars; ++i)
+    {
+        string[i] = rand() % (126 - 33 + 1) + 33;
+    }
+ 
+    string[num_chars] = '\0';  
 }
 
+int randomTTL() {
+	int r;
+    r = rand();
+	r = r % (4 - 1 + 1) + 1;
+	return r;
+}
 
-
-
-
+int IPtoDec(char*IPdot) {
+	int a,b,c,d;
+	sscanf(IPdot,"%d.%d.%d.%d",&a,&b,&c,&d);
+	int ip;
+	unsigned int thisa = a<<24;
+	unsigned int thisb = b<<16;
+	unsigned int thisc = c<<8;
+	unsigned int sum = thisa+thisb+thisc+d;
+	ip = sum;
+	return ip;
+}
 
 int main( int argc, char ** argv)
 {
@@ -77,44 +62,121 @@ int main( int argc, char ** argv)
 	int s, i, slen=sizeof(si_other);
 	char buf[BUFLEN];
 
-	if ( argc != 2 )
+	if ( argc != 3 )
 	{
-		printf("\n\nusage: %s <int value>\n\n", argv[0]);
+		printf("\n\nusage: %s <int value> <outputfile>\n\n", argv[0]);
 		return 3;
 	}
+	char * filename;
+	FILE *ofp;
+	char *mode = "w";
+	filename = argv[2];
+	ofp = fopen(filename, mode);	
+	const char * network1 = "networkA";
+	const char * network2 = "networkB";
+	const char * network3 = "networkC";
+	
+	
 
-
-	if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
+	/* Seed number for rand() */ 
+	srand((unsigned int) time(0)); 
+    int Packet_ID=0;
+	int thisTTL;
+	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
+    while (1)
 	{
-		printf("Error in creating socket");
-		return 1;
+		//handle_signals();
+
+		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
+		struct IP_packet *Package_list;
+		Package_list = malloc(sizeof(struct IP_packet) *20);
+        for (int i = 0; i<20; i++)
+	    {
+			// Package ID
+			Packet_ID++;
+			
+			// Source IP and Destination IP
+			char* source_IP;
+			int randi1 = rand() % (8-0 + 1) + 0;
+			int randi2 = rand() % (9-0 + 1) + 1;
+			
+			source_IP = networks[randi1];
+			
+			char* destination_IP;
+			if (randi2 == 9)
+			{
+				countInvalid++;
+			}
+			else if (randi1>=0 && randi1< 2 && randi2 !=9)
+			{
+				if (randi2>=0 && randi2 <2)
+				{
+					countInvalid++;
+				}
+				else if (randi2 >=2 && randi2 <5)
+				{
+					countAtoB++;
+				}
+				else if (randi2 >=5 && randi2 <8)
+				{
+					countAtoC++;
+				}
+				
+			}
+			else if (randi1 >=2 && randi1 < 5 && randi2 != 9)
+			{
+				if (randi2>=0 && randi2 <2)
+				{
+					countBtoA++;
+				}
+				else if (randi2 >=2 && randi2 <5)
+				{
+					countInvalid++;
+				}
+				else if (randi2 >=5 && randi2 <8)
+				{
+					countBtoC++;
+				}
+			}
+			else if (randi1 >=5 && randi1 < 9 && randi2 != 9)
+			{	
+				if (randi2>=0 && randi2 <2)
+				{
+					countCtoA++;
+				}
+				else if (randi2 >=2 && randi2 <5)
+				{
+					countCtoB++;
+				}
+				else if (randi2 >=5 && randi2 <8)
+				{
+					countInvalid++;
+				}
+			}
+			destination_IP = networks[randi2];
+			
+			// TTL
+			thisTTL = randomTTL();
+
+			// Payload
+	    	char s[20];    	    
+	    	random_payload(s, 20);
+
+			// Package_list infos
+		    Package_list[i].packet_id = Packet_ID;
+		    Package_list[i].sourceIP = source_IP;
+			Package_list[i].destinationIP = destination_IP;
+			Package_list[i].TTL = thisTTL;
+			Package_list[i].payload = s;
+		}
+		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network2,countAtoB,network1,network2);
+		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network3,countAtoC,network1,network3);
+		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network2, network1,countBtoA,network2,network1);
+		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network2, network3,countBtoC,network2,network3);
+		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
+		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
+		fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
+		free(Package_list);
 	}
-
-	memset((char *) &si_me, 0, sizeof(si_me));
-	si_me.sin_family = AF_INET;
-	si_me.sin_port = htons(PORT);
-	si_me.sin_addr.s_addr = htonl(IP);    /* htonl(INADDR_ANY) for any interface on this machine */
-
-	si_other.sin_family = AF_INET;
-	si_other.sin_port = htons(SERVERPORT);
-	si_other.sin_addr.s_addr = htonl(IP); 
-
-
-	if ( bind(s, &si_me, sizeof(si_me)) == -1 )
-	{
-		printf("Error in binding the socket");
-		return 2;
-	}
-
-	printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
-
-	strcpy(buf, argv[1]);
-	printf("\nSending %s to %s:%d\n", buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-	sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
-
-	if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
-		printf("\nReceived packet from %s:%d  Fact(%s): %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), argv[1], buf);
-
-	close(s);
  	return 0;
  }
