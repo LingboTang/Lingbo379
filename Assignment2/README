@@ -6,11 +6,5 @@ and then ./server
 and then ./client
 
 
-2 brief step remaining for myself to do the part a:
-4. Write the package sending and recieving through socket. Build up a struct which contains 
-	int packet id;
-	char* sourceIP;
-	char* destinationIP;
-	int TTL;
-	char* payload;
-5. write this into the statistic file.
+1 brief step remaining for myself to do the part a:
+1.sending and recieving through socket.
