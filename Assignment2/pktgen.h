@@ -20,15 +20,6 @@ struct IP_address
 	int ip;
 };
 
-struct PrintInfo
-{
-	char * sourceClient;
-	char * destinationClient;
-	char * source_ip;
-	char * destination_ip;
-};
-
-
 char* networkA[3] = {"192.168.128.7","192.168.128.1","networkA"};
 char* networkB[4] = {"192.168.192.10","192.168.192.6","192.168.192.4","networkB"};
 char* networkC[5] = {"192.224.0.5","192.224.0.7","192.224.10.5","192.224.15.6","networkC"};
