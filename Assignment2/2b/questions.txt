@@ -1,0 +1,14 @@
+Xiaolu Wang
+
+Question0:
+The server_p and server_f ar relatively easy to implement as each client can be served by one procee or one thread. Also the program take advantage of using block for the functions. server_s is need to select to deal with the client by itself. Also server_f has non-blocking input and output. 
+
+Question1:
+In server_f, we use multiprocess to deal with clients. Comparing with server_p, it copy large amount of data and avoid the synchronization overhead. Also it takes advantage by use independent memory space and reduce the influence among the processes. 
+On the other hand, server_p is more efficient as it cost less to establish, terminate and switching among the threads. Also it sharing the memory among threads, so there is less context in thread.
+As a result, server_f is safer but less portable than server_p.
+
+Question2:
+With server_s, we use select() instead of using different processes for each request. server_s only one thread dealing with the multiple requests from different clients. It takes advantage by using a single thread to handle all request, as it do not need to deal with the sharing memory and the tasks communication during the synchronization.
+However, server_p takes advantage by using multithread as each thread only need to deal one client at a time. As a result, server_s is useful and efficient when there are less clients or the clients demand to access and edit some certain memory. On the other hand, server_p is useful when there are large amount of clients with heavy and frequent requests.
+

@@ -13,9 +13,13 @@ int main(void)
         exit(EXIT_FAILURE);
 
     while ((read = getline(&line, &len, fp)) != -1) {
-        printf("Retrieved line of length %zu :\n", read);
-        printf("%s", line);
-		printf("%c\n",line[1]);
+		if (line[0] != '\n')
+		{
+			char IP[16];
+			char router[8];
+			int length;
+			sscanf(line,"%s %d %s",IP,&length,router);
+		}	
     }
 
     free(line);
