@@ -41,14 +41,6 @@ void random_payload(char * string, size_t length)
     string[num_chars] = '\0';  
 }
 
-// Randomly gererating the TTL
-int randomTTL() {
-	int r;
-    r = rand();
-	r = r % (4 - 1 + 1) + 1;
-	return r;
-}
-
 // Convert the IP string to decimal
 unsigned int IPtoDec(char*IPdot) {
 	int a,b,c,d;
@@ -62,6 +54,33 @@ unsigned int IPtoDec(char*IPdot) {
 	unsigned int sum = thisa+thisb+thisc+d;
 	ip = sum;
 	return ip;
+}
+
+/*
+ * Referrence of itoa function
+ * http://stackoverflow.com/questions/9655202/how-to-convert-integer-to-string-in-c
+ * author: bhuwansahni
+ * Edit date: March 12,2012
+ */
+ 
+char* itoa(int i, char b[]){
+    char const digit[] = "0123456789";
+    char* p = b;
+    if(i<0){
+        *p++ = '-';
+        i *= -1;
+    }
+    int shifter = i;
+    do{ //Move to where representation ends
+        ++p;
+        shifter = shifter/10;
+    }while(shifter);
+    *p = '\0';
+    do{ //Move back, inserting digits as u go
+        *--p = digit[i%10];
+        i = i/10;
+    }while(i);
+    return b;
 }
 
 int main( int argc, char ** argv)
@@ -92,25 +111,28 @@ int main( int argc, char ** argv)
 	const char * network2 = "networkB";
 	const char * network3 = "networkC";
 	
-	
 
 	/* Seed number for rand() */ 
 	srand((unsigned int) time(0)); 
     int Packet_ID=0;
 	int thisTTL;
+	
 	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
     while (1)
 	{
 		//handle_signals();
 
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
-		struct IP_packet *Package_list;
-		Package_list = malloc(sizeof(struct IP_packet) *20);
 		int i;
         for (i = 0; i<20; i++)
 	    {
+
+	    	char *package = malloc(sizeof(char*)*20);
+
 			// Package ID
 			Packet_ID++;
+			char buffer[32];
+			char * packet_ID = itoa(Packet_ID,buffer);
 			
 			// Source IP and Destination IP
 			char* source_IP;
@@ -131,11 +153,11 @@ int main( int argc, char ** argv)
 			}
 			else if (randi1>=0 && randi1< 2 && randi2 !=9)
 			{
-				if (randi2>=0 && randi2 <2)
+				while (randi2>=0 && randi2 <2)
 				{
-					countInvalid++;
+					randi2 = rand() % (8-0+1)+0;
 				}
-				else if (randi2 >=2 && randi2 <5)
+				if (randi2 >=2 && randi2 <5)
 				{
 					countAtoB++;
 				}
@@ -147,13 +169,13 @@ int main( int argc, char ** argv)
 			}
 			else if (randi1 >=2 && randi1 < 5 && randi2 != 9)
 			{
+				while (randi2 >=2 && randi2 <5)
+				{
+					randi2 = rand() % (8-0+1)+0;
+				}
 				if (randi2>=0 && randi2 <2)
 				{
 					countBtoA++;
-				}
-				else if (randi2 >=2 && randi2 <5)
-				{
-					countInvalid++;
 				}
 				else if (randi2 >=5 && randi2 <8)
 				{
@@ -162,6 +184,10 @@ int main( int argc, char ** argv)
 			}
 			else if (randi1 >=5 && randi1 < 9 && randi2 != 9)
 			{	
+				while (randi2 >=5 && randi2 <8)
+				{
+					randi2 = rand() % (8-0+1)+0;
+				}
 				if (randi2>=0 && randi2 <2)
 				{
 					countCtoA++;
@@ -170,26 +196,31 @@ int main( int argc, char ** argv)
 				{
 					countCtoB++;
 				}
-				else if (randi2 >=5 && randi2 <8)
-				{
-					countInvalid++;
-				}
 			}
 			destination_IP = networks[randi2];
 			
 			// TTL
-			thisTTL = randomTTL();
+			char *pktTTL;
+			thisTTL = rand() % (3 - 0 + 1) + 0;
+			pktTTL = TTL[thisTTL];
 
 			// Payload
 	    	char s[20];    	    
 	    	random_payload(s, 20);
 
-			// Package_list infos
-		    Package_list[i].packet_id = Packet_ID;
-		    Package_list[i].sourceIP = source_IP;
-			Package_list[i].destinationIP = destination_IP;
-			Package_list[i].TTL = thisTTL;
-			Package_list[i].payload = s;
+			// Package_list info
+			char *space = " ";
+			strcpy(package,packet_ID);
+			strcat(package,space);
+			strcat(package,source_IP);
+			strcat(package,space);
+			strcat(package,destination_IP);
+			strcat(package,space);
+			strcat(package,pktTTL);
+			strcat(package,space);
+			strcat(package,s);
+			printf("%s\n",package);
+			free(package);
 		}
 
 		// Print out the results in the network file
@@ -200,7 +231,6 @@ int main( int argc, char ** argv)
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
 		fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
-		free(Package_list);
 	}
  	return 0;
  }
