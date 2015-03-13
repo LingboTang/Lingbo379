@@ -106,7 +106,8 @@ int main( int argc, char ** argv)
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 		struct IP_packet *Package_list;
 		Package_list = malloc(sizeof(struct IP_packet) *20);
-        for (int i = 0; i<20; i++)
+		int i;
+        for (i = 0; i<20; i++)
 	    {
 			// Package ID
 			Packet_ID++;

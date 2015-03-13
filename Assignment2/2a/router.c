@@ -9,6 +9,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <math.h>
+#include "pktgen.h"
+#include "router.h"
 
 #define BUFLEN 512
 #define maxaline 64
@@ -56,8 +59,11 @@ int main(int argc, char**argv)
 	filename2 = argv[3];
 	ofp = fopen(filename2, mode2);
 		
-	char line[maxaline+1];
+	FILE *testfp;
+	char* filename3 = "oo.txt";
+	testfp = fopen(filename3,"w");
 	int j=0;
+	char line[maxaline+1];
 	char* filetext;
 	int onthego = initial;
 	filetext = malloc(onthego*sizeof(line));
@@ -73,10 +79,22 @@ int main(int argc, char**argv)
 		}
 		memset(line, 0, maxaline + 1);
 	}
-	for (j = j-maxaline-1; j >=0; j -= maxaline+1)
+	int k;
+	//struct routing *routing_list;
+	//routing_list = malloc(sizeof(routing_list)*(j/maxaline));
+	for (k = 0; k<= j; k += maxaline+1)
 	{
-		fprintf(stdout,"%s",&filetext[j-maxaline-1]);
-	}	
-	free(filetext);
+		char *line = &filetext[k];
+		printf("%s\n",line);
+		//char *network,*router;
+		//int length;
+		//sscanf(line,"%s %d %s",network,&length,router);
+		//printf("%s\n",network);
+		//printf("%d\n",length);
+		//printf("%s\n",router);
+		//fprintf(testfp,"%s",&filetext[k]);
+	}
+	//free(routing_list);
+	//free(filetext);
  	return 0;
  }
