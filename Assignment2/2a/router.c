@@ -17,19 +17,6 @@
 #define PORT 9930
 #define IP 2130706433  /* 127.0.0.1 */
 
-int fact (int n)r
-{
-	if (n <= 1)
-		return 1;
-	else
-		return n * fact (n-1);
-}
-
-int decrement (int n)
-{
-	return n-1;
-}
-
 int main(int argc, char**argv)
 {
 	struct sockaddr_in si_me, si_other;
@@ -79,9 +66,9 @@ int main(int argc, char**argv)
 			char router[8];
 			int length;
 			sscanf(line,"%s %d %s",IP_ad,&length,router);
-			printf("%s\n",IP_ad);
-			printf("%d\n",length);
-			printf("%s\n",router);
+			//printf("%s\n",IP_ad);
+			//printf("%d\n",length);
+			//printf("%s\n",router);
 		}
     }
     free(line);
@@ -119,3 +106,45 @@ int main(int argc, char**argv)
 	close(s);
  	return 0;
  }
+
+int fact (int n)
+{
+	if (n <= 1)
+		return 1;
+	else
+		return n * fact (n-1);
+}
+
+int decrement (int n)
+{
+	return n-1;
+}
+
+// Code from http://www.programmingsimplified.com/c/source-code/c-program-convert-decimal-to-binary
+
+char *decimal_to_binary(int n)
+{
+   int c, d, count;
+   char *pointer;
+ 
+   count = 0;
+   pointer = (char*)malloc(32+1);
+ 
+   if ( pointer == NULL )
+      exit(EXIT_FAILURE);
+ 
+   for ( c = 31 ; c >= 0 ; c-- )
+   {
+      d = n >> c;
+ 
+      if ( d & 1 )
+         *(pointer+count) = 1 + '0';
+      else
+         *(pointer+count) = 0 + '0';
+ 
+      count++;
+   }
+   *(pointer+count) = '\0';
+ 
+   return  pointer;
+}

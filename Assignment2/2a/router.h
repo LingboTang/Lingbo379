@@ -14,3 +14,7 @@ struct routing
 	int prefix_length;
 	char* nexthop;
 };
+
+int fact (int n);
+int decrement (int n);
+char *decimal_to_binary(int n);
