@@ -15,7 +15,7 @@
 #define BUFLEN 512
 #define SERVERPORT 9930
 #define PORT 9931
-//#define IP 2130706433  /* 127.0.0.1 */
+#define IP 2130706433  /* 127.0.0.1 */
 
 
 /* Random generator Referrence
@@ -124,6 +124,19 @@ int main( int argc, char ** argv)
 
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 		int i;
+		if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
+		{
+			printf("Error in creating socket");
+			return 1;
+		}
+		memset((char *) &si_me, 0, sizeof(si_me));
+		si_me.sin_family = AF_INET;
+		si_me.sin_port = htons(PORT);
+		si_me.sin_addr.s_addr = htonl(IP);    /* htonl(INADDR_ANY) for any interface on this machine */
+
+		si_other.sin_family = AF_INET;
+		si_other.sin_port = htons(SERVERPORT);
+		si_other.sin_addr.s_addr = htonl(IP);
         for (i = 0; i<20; i++)
 	    {
 
@@ -220,6 +233,19 @@ int main( int argc, char ** argv)
 			strcat(package,space);
 			strcat(package,s);
 			printf("%s\n",package);
+			//if ( bind(s, &si_me, sizeof(si_me)) == -1 )
+			//{
+			//	printf("Error in binding the socket");
+			//	return 2;
+			//}
+			printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
+
+			strcpy(buf, argv[1]);
+			printf("\nSending %s to %s:%d\n", buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+			sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
+
+			if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
+				printf("\nReceived packet from %s:%d  Fact(%s): %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), argv[1], buf);
 			free(package);
 		}
 
@@ -231,6 +257,7 @@ int main( int argc, char ** argv)
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
 		fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
+		close(s);
 	}
  	return 0;
  }

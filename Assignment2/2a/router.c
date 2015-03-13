@@ -17,7 +17,7 @@
 #define PORT 9930
 #define IP 2130706433  /* 127.0.0.1 */
 
-int fact (int n)
+int fact (int n)r
 {
 	if (n <= 1)
 		return 1;
