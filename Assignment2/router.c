@@ -3,12 +3,16 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #define BUFLEN 512
+#define maxaline 64
+#define initial 10
 #define PORT 9930
 #define IP 2130706433  /* 127.0.0.1 */
 
@@ -26,43 +30,53 @@ int main(int argc, char**argv)
 	int s, i, slen=sizeof(si_other);
 	char buf[BUFLEN];
 
-	if ( argc != 3 )
+
+	// If the user input the wrong command line
+	// just exit with failure
+	if ( argc != 4 )
 	{
 		printf("\n\nusage: %s <int value>\n\n", argv[0]);
 		exit(1);
 	}
 
+	// The first argument is the port number 
+	int portnumber = atoi(argv[1]);
+	
+	// The second argument is the routing table
+	char * filename1;
+	FILE *ifp;
+	char *mode1 = "r";
+	filename1 = argv[2];
+	ifp = fopen(filename1, mode1);
 
-	if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
+	// The third argument is the statistic file name
+	char * filename2;
+	FILE *ofp;
+	char *mode2 = "w";
+	filename2 = argv[3];
+	ofp = fopen(filename2, mode2);
+		
+	char line[maxaline+1];
+	int j=0;
+	char* filetext;
+	int onthego = initial;
+	filetext = malloc(onthego*sizeof(line));
+	memset(line, 0, maxaline + 1);
+	while((fgets(line,maxaline+1,ifp))!=NULL)
 	{
-		printf("Error in creating socket");
-		return 1;
-	}
-
-	memset((char *) &si_me, 0, sizeof(si_me));
-	si_me.sin_family = AF_INET;
-	si_me.sin_port = htons(PORT);
-	si_me.sin_addr.s_addr = htonl(IP); /* htonl(INADDR_ANY) for any interface on this machine */
-
-	if ( bind(s, &si_me, sizeof(si_me)) == -1 )
-	{
-		printf("Error in binding the socket");
-		return 2;
-	}
-
-	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
-	while (1) 
-	{
-		if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
+		strncpy(&filetext[j],line,maxaline+1);
+		j += maxaline+1;
+		if (j == onthego)
 		{
-			printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
-			i = atoi(buf);
-			sprintf(buf, "%d", fact(i));
-			printf("\nSending Fact(%d): %s to %s:%d\n", i, buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-			sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
+			onthego *= 2;
+			filetext = realloc(filetext,onthego*sizeof(line));
 		}
+		memset(line, 0, maxaline + 1);
 	}
-
-	close(s);
+	for (j = j-maxaline-1; j >=0; j -= maxaline+1)
+	{
+		fprintf(stdout,"%s",&filetext[j-maxaline-1]);
+	}	
+	free(filetext);
  	return 0;
  }
