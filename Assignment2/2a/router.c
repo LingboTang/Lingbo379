@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <math.h>
-//#include "pktgen.h"
+#include "pktgen.h"
 #include "router.h"
 
 #define BUFLEN 512

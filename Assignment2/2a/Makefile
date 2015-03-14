@@ -14,4 +14,4 @@ router.o: router.c router.h pktgen.h
 	gcc -m32 -c pktgen.h
 
 clean:
-	rm -rf *.o *~
+	rm -rf *.o *~ *.gch
