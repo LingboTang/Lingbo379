@@ -5,6 +5,4 @@ How to make it precisely?
 and then ./server
 and then ./client
 
-
-1 brief step remaining for myself to do the part a:
-1.sending and recieving through socket.
+Sending works, just need to fix some function in router.

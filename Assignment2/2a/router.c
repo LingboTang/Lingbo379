@@ -34,7 +34,7 @@ int main(int argc, char**argv)
 	}
 
 	// The first argument is the port number 
-	int portnumber = atoi(argv[1]);
+	//int portnumber = atoi(argv[1]);
 	
 	// The second argument is the routing table
 	char * filename1;
@@ -84,24 +84,29 @@ int main(int argc, char**argv)
 	si_me.sin_port = htons(PORT);
 	si_me.sin_addr.s_addr = htonl(IP); /* htonl(INADDR_ANY) for any interface on this machine */
 
-	if ( bind(s, &si_me, sizeof(si_me)) == -1 )
+	if ( bind(s, (struct sockaddr *)&si_me, sizeof(si_me)) == -1 )
 	{
 		printf("Error in binding the socket");
 		return 2;
 	}
 
+	strcpy(buf, argv[1]);
 	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
 	while (1) 
 	{
-		if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
+		if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, &slen) != -1)
 		{
 			printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
 			i = atoi(buf);
 			sprintf(buf, "%d", fact(i));
+			//printf("here\n");
+			//printf("%s\n",buf);
 			printf("\nSending Fact(%d): %s to %s:%d\n", i, buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-			sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
+			//sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
 		}
 	}
+
+	printf("%s\n",buf);
 
 	close(s);
  	return 0;

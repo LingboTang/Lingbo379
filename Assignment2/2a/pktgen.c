@@ -13,8 +13,8 @@
 #include "pktgen.h"
 
 #define BUFLEN 512
-#define SERVERPORT 9930
 #define PORT 9931
+#define SERVERPORT 9930
 #define IP 2130706433  /* 127.0.0.1 */
 
 int main( int argc, char ** argv)
@@ -33,7 +33,7 @@ int main( int argc, char ** argv)
 	}
 	
 	// The first arguement is the port number
-	int portnum = atoi(argv[1]);
+	//int SERVERPORT = atoi(argv[1]);
 
 	// The second arguement is the network log
 	char * filename;
@@ -44,7 +44,19 @@ int main( int argc, char ** argv)
 	const char * network1 = "networkA";
 	const char * network2 = "networkB";
 	const char * network3 = "networkC";
-	
+	if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
+	{
+		printf("Error in creating socket");
+		return 1;
+	}
+	memset((char *) &si_me, 0, sizeof(si_me));
+	si_me.sin_family = AF_INET;
+	si_me.sin_port = htons(PORT);
+	si_me.sin_addr.s_addr = htonl(IP);    /* htonl(INADDR_ANY) for any interface on this machine */
+	//int SERVERPORT = atoi(argv[1]);
+	si_other.sin_family = AF_INET;
+	si_other.sin_port = htons(SERVERPORT);
+	si_other.sin_addr.s_addr = htonl(IP);
 
 	/* Seed number for rand() */ 
 	srand((unsigned int) time(0)); 
@@ -58,19 +70,7 @@ int main( int argc, char ** argv)
 
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 		int i;
-		if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
-		{
-			printf("Error in creating socket");
-			return 1;
-		}
-		memset((char *) &si_me, 0, sizeof(si_me));
-		si_me.sin_family = AF_INET;
-		si_me.sin_port = htons(PORT);
-		si_me.sin_addr.s_addr = htonl(IP);    /* htonl(INADDR_ANY) for any interface on this machine */
-
-		si_other.sin_family = AF_INET;
-		si_other.sin_port = htons(SERVERPORT);
-		si_other.sin_addr.s_addr = htonl(IP);
+		
         for (i = 0; i<20; i++)
 	    {
 
@@ -152,8 +152,8 @@ int main( int argc, char ** argv)
 			pktTTL = TTL[thisTTL];
 
 			// Payload
-	    	char s[20];    	    
-	    	random_payload(s, 20);
+	    	char payload[20];    	    
+	    	random_payload(payload, 20);
 
 			// Package_list info
 			char *space = " ";
@@ -165,8 +165,8 @@ int main( int argc, char ** argv)
 			strcat(package,space);
 			strcat(package,pktTTL);
 			strcat(package,space);
-			strcat(package,s);
-			printf("%s\n",package);
+			strcat(package,payload);
+			//printf("%s\n",package);
 			//if ( bind(s, &si_me, sizeof(si_me)) == -1 )
 			//{
 			//	printf("Error in binding the socket");
@@ -174,12 +174,12 @@ int main( int argc, char ** argv)
 			//}
 			printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
 
-			strcpy(buf, argv[1]);
+			strcpy(buf, package);
 			printf("\nSending %s to %s:%d\n", buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-			sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
+			sendto(s, buf, strlen(buf) + 1, 0, (struct sockaddr *)&si_other, sizeof(si_other));
 
-			if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
-				printf("\nReceived packet from %s:%d  Fact(%s): %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), argv[1], buf);
+			//if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
+			//	printf("\nReceived packet from %s:%d  Fact(%s): %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), argv[1], buf);
 			free(package);
 		}
 
@@ -217,21 +217,6 @@ void random_payload(char * string, size_t length)
     }
  
     string[num_chars] = '\0';  
-}
-
-// Convert the IP string to decimal
-unsigned int IPtoDec(char*IPdot) {
-	int a,b,c,d;
-	// Scan them to the int type
-	sscanf(IPdot,"%d.%d.%d.%d",&a,&b,&c,&d);
-	unsigned int ip;
-	// Bit shifting to the correct position
-	unsigned int thisa = a<<24;
-	unsigned int thisb = b<<16;
-	unsigned int thisc = c<<8;
-	unsigned int sum = thisa+thisb+thisc+d;
-	ip = sum;
-	return ip;
 }
 
 /*
