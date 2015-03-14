@@ -15,6 +15,16 @@ struct routing
 	char* nexthop;
 };
 
+struct ip_pack
+{
+	int pack_id;
+	char* SourceIP;
+	char* DestinationIP;
+	int TTL;
+	char* payload;
+};
+
 int fact (int n);
 int decrement (int n);
 char *decimal_to_binary(int n);
+struct ip_pack decode_packet(char* packets);

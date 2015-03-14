@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <math.h>
-#include "pktgen.h"
+//#include "pktgen.h"
 #include "router.h"
 
 #define BUFLEN 512
@@ -94,15 +94,19 @@ int main(int argc, char**argv)
 	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
 	while (1) 
 	{
-		if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, &slen) != -1)
+		int i ;
+		for (i =0; i<20; i++)
 		{
-			printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
-			i = atoi(buf);
-			sprintf(buf, "%d", fact(i));
-			//printf("here\n");
-			//printf("%s\n",buf);
-			printf("\nSending Fact(%d): %s to %s:%d\n", i, buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-			//sendto(s, buf, strlen(buf) + 1, 0, &si_other, sizeof(si_other));
+			if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, &slen) != -1)
+			{
+				printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
+				struct ip_pack tmpdecode;
+				tmpdecode = decode_packet(buf);
+				if (decrement(tmpdecode.TTL) == 0)
+				{
+					printf("This is expired\n");
+				}
+			}
 		}
 	}
 
@@ -152,4 +156,24 @@ char *decimal_to_binary(int n)
    *(pointer+count) = '\0';
  
    return  pointer;
+}
+
+struct ip_pack decode_packet(char* packets)
+{
+	int PACKET_ID;
+	char* source_IP = malloc(sizeof(char*));
+	char* destination_IP = malloc(sizeof(char*));
+	int myTTL;
+	char* mypayload = malloc(sizeof(char*));
+	struct ip_pack decode_list;
+	sscanf(packets,"%d %s %s %d %s",&PACKET_ID,source_IP,destination_IP,&myTTL,mypayload);
+	decode_list.pack_id = PACKET_ID;
+	decode_list.SourceIP = source_IP;
+	decode_list.DestinationIP = destination_IP;
+	decode_list.TTL = myTTL;
+	decode_list.payload = mypayload;
+	//free(source_IP);
+	//free(destination_IP);
+	//free(mypayload);
+	return decode_list;
 }

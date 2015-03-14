@@ -73,7 +73,6 @@ int main( int argc, char ** argv)
 		
         for (i = 0; i<20; i++)
 	    {
-
 	    	char *package = malloc(sizeof(char*)*20);
 
 			// Package ID
@@ -166,20 +165,11 @@ int main( int argc, char ** argv)
 			strcat(package,pktTTL);
 			strcat(package,space);
 			strcat(package,payload);
-			//printf("%s\n",package);
-			//if ( bind(s, &si_me, sizeof(si_me)) == -1 )
-			//{
-			//	printf("Error in binding the socket");
-			//	return 2;
-			//}
 			printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
 
 			strcpy(buf, package);
 			printf("\nSending %s to %s:%d\n", buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
 			sendto(s, buf, strlen(buf) + 1, 0, (struct sockaddr *)&si_other, sizeof(si_other));
-
-			//if ( recvfrom(s, buf, BUFLEN, 0, &si_other, &slen) != -1)
-			//	printf("\nReceived packet from %s:%d  Fact(%s): %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), argv[1], buf);
 			free(package);
 		}
 
