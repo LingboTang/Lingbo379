@@ -5,4 +5,12 @@ How to make it precisely?
 and then ./server
 and then ./client
 
-Sending works, just need to fix some function in router.
+1. Write the function to make decision by passing the destip and routing table.
+
+2. Write the function to print out the statistic file.
+
+3. Error Handeling, sleep when 2 packets are generated.
+
+What to do in 2b?:
+
+Server is done, Just need to modify it to make it fit the client.

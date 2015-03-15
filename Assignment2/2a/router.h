@@ -24,7 +24,18 @@ struct ip_pack
 	char* payload;
 };
 
+struct statistic
+{
+	int Nexpired;
+	int Nunroutable;
+	int Ndelivered;
+	int NrouterB;
+	int NrouterC;
+};
+
 int fact (int n);
 int decrement (int n);
 char *decimal_to_binary(int n);
 struct ip_pack decode_packet(char* packets);
+unsigned int IPtoDec(char*IPdot);
+void Making_Decision(char*ip,struct routing table);

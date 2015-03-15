@@ -62,12 +62,12 @@ int main( int argc, char ** argv)
 	srand((unsigned int) time(0)); 
     int Packet_ID=0;
 	int thisTTL;
-	
+	int sum;
 	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
     while (1)
 	{
 		//handle_signals();
-
+		sum = 0;
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 		int i;
 		
@@ -103,6 +103,7 @@ int main( int argc, char ** argv)
 				{
 					randi2 = rand() % (8-0+1)+0;
 				}
+				printf("%d\n",randi2);
 				if (randi2 >=2 && randi2 <5)
 				{
 					countAtoB++;
@@ -119,6 +120,7 @@ int main( int argc, char ** argv)
 				{
 					randi2 = rand() % (8-0+1)+0;
 				}
+				printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
 				{
 					countBtoA++;
@@ -134,6 +136,7 @@ int main( int argc, char ** argv)
 				{
 					randi2 = rand() % (8-0+1)+0;
 				}
+				printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
 				{
 					countCtoA++;
@@ -172,8 +175,9 @@ int main( int argc, char ** argv)
 			sendto(s, buf, strlen(buf) + 1, 0, (struct sockaddr *)&si_other, sizeof(si_other));
 			free(package);
 		}
-
+		sum = countAtoB+countAtoC+countBtoA+countBtoC+countCtoA+countCtoB+countInvalid;
 		// Print out the results in the network file
+		fprintf(ofp,"%d\n",sum);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network2,countAtoB,network1,network2);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network3,countAtoC,network1,network3);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network2, network1,countBtoA,network2,network1);
