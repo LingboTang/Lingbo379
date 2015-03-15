@@ -59,8 +59,8 @@ int main(int argc, char**argv)
         exit(EXIT_FAILURE);
 	}
 	
-	struct routing *r_table;
-	r_table = malloc(sizeof(routing*)*3);
+	struct routing* r_table;
+	r_table = malloc(sizeof(struct routing)*3);
 	int index = 0;
     while ((read = getline(&line, &len, ifp)) != -1) {
 		if (line[0] != '\n')
@@ -103,7 +103,7 @@ int main(int argc, char**argv)
 	while (1) 
 	{
 		int i ;
-		struct statistic;
+		struct statistic stat;
 		for (i =0; i<20; i++)
 		{
 			if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, &slen) != -1)
@@ -111,17 +111,10 @@ int main(int argc, char**argv)
 				printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
 				struct ip_pack tmpdecode;
 				tmpdecode = decode_packet(buf);
-				if (decrement(tmpdecode.TTL) == 0)
-				{
-					printf("This is expired\n");
-					statistic.Nexpired++;
-				}
 			}
 		}
 	}
-
-	printf("%s\n",buf);
-
+	free(r_table);
 	close(s);
  	return 0;
  }
@@ -141,32 +134,7 @@ int decrement (int n)
 
 // Code from http://www.programmingsimplified.com/c/source-code/c-program-convert-decimal-to-binary
 
-char *decimal_to_binary(int n)
-{
-   int c, d, count;
-   char *pointer;
- 
-   count = 0;
-   pointer = (char*)malloc(32+1);
- 
-   if ( pointer == NULL )
-      exit(EXIT_FAILURE);
- 
-   for ( c = 31 ; c >= 0 ; c-- )
-   {
-      d = n >> c;
- 
-      if ( d & 1 )
-         *(pointer+count) = 1 + '0';
-      else
-         *(pointer+count) = 0 + '0';
- 
-      count++;
-   }
-   *(pointer+count) = '\0';
- 
-   return  pointer;
-}
+
 
 struct ip_pack decode_packet(char* packets)
 {
@@ -199,7 +167,41 @@ unsigned int IPtoDec(char*IPdot) {
    return ip;
 }
 
-void Making_Decision(char*ip,struct routing table)
+int Ip_masking(char*ip,struct routing table)
 {
-	
+	int cmpsize = table.prefix_length;
+	int dec_t_ip = IPtoDec(table.IP_addr);
+	int dec_p_ip = IPtoDec(ip);
+	int shift = 31-cmpsize;
+	int t_cmp = dec_t_ip>>shift;
+	int p_cmp = dec_p_ip>>shift;
+	if (p_cmp == t_cmp)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
 }
+
+struct statistic Make_Decision(char*ip,struct routing* tables)
+{
+	int ri = 0;
+	struct statistic stats;
+	if (decrement(tmpdecode.TTL) == 0)
+	{
+		printf("This is expired\n");
+		stats.Nexpired++;
+	}
+	while (Ip_masking(ip,tables[ri]) == 0)
+	{
+		ri++;
+		Ip_masking(ip,tables[ri]);
+	}
+	if (ri == 0)
+	{
+
+	}
+	return stats;
+} 

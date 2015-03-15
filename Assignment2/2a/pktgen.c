@@ -64,6 +64,7 @@ int main( int argc, char ** argv)
 	int thisTTL;
 	int sum;
 	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
+    //(void) signal(SIGINT, sig_handler);
     while (1)
 	{
 		//handle_signals();
@@ -77,6 +78,10 @@ int main( int argc, char ** argv)
 
 			// Package ID
 			Packet_ID++;
+			//if (Packet_ID%2 == 0)
+			//{
+			//	sleep(1);
+			//}
 			char buffer[32];
 			char * packet_ID = itoa(Packet_ID,buffer);
 			
@@ -97,44 +102,44 @@ int main( int argc, char ** argv)
 			{
 				countInvalid++;
 			}
-			else if (randi1>=0 && randi1< 2 && randi2 !=9)
+			else if (randi1>=0 && randi1< 2 && randi2 <9)
 			{
 				while (randi2>=0 && randi2 <2)
 				{
-					randi2 = rand() % (8-0+1)+0;
+					randi2 = rand() % 8;
 				}
 				printf("%d\n",randi2);
 				if (randi2 >=2 && randi2 <5)
 				{
 					countAtoB++;
 				}
-				else if (randi2 >=5 && randi2 <8)
+				else if (randi2 >=5 && randi2 <9)
 				{
 					countAtoC++;
 				}
 				
 			}
-			else if (randi1 >=2 && randi1 < 5 && randi2 != 9)
+			else if (randi1 >=2 && randi1 < 5 && randi2 < 9)
 			{
 				while (randi2 >=2 && randi2 <5)
 				{
-					randi2 = rand() % (8-0+1)+0;
+					randi2 = rand() % 8;
 				}
 				printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
 				{
 					countBtoA++;
 				}
-				else if (randi2 >=5 && randi2 <8)
+				else if (randi2 >=5 && randi2 <9)
 				{
 					countBtoC++;
 				}
 			}
-			else if (randi1 >=5 && randi1 < 9 && randi2 != 9)
+			else if (randi1 >=5 && randi1 < 9 && randi2 < 9)
 			{	
-				while (randi2 >=5 && randi2 <8)
+				while (randi2 >=5 && randi2 <9)
 				{
-					randi2 = rand() % (8-0+1)+0;
+					randi2 = rand() % 8;
 				}
 				printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
@@ -238,4 +243,11 @@ char* itoa(int i, char b[]){
         i = i/10;
     }while(i);
     return b;
+}
+
+// sig handler
+void sig_handler(int sig)
+{
+	stop_flag = 0;
+	
 }
