@@ -39,32 +39,4 @@ char *decimal_to_binary(int n);
 struct ip_pack decode_packet(char* packets);
 unsigned int IPtoDec(char*IPdot);
 int Ip_masking(char*ip,struct routing table);
-struct statistic Make_Decision(char*ip,struct routing* tables);
-
-/*
-char *decimal_to_binary(int n)
-{
-   int c, d, count;
-   char *pointer;
- 
-   count = 0;
-   pointer = (char*)malloc(32+1);
- 
-   if ( pointer == NULL )
-      exit(EXIT_FAILURE);
- 
-   for ( c = 31 ; c >= 0 ; c-- )
-   {
-      d = n >> c;
- 
-      if ( d & 1 )
-         *(pointer+count) = 1 + '0';
-      else
-         *(pointer+count) = 0 + '0';
- 
-      count++;
-   }
-   *(pointer+count) = '\0';
- 
-   return  pointer;
-}*/
+struct statistic Make_Decision(struct ip_pack pack,struct routing* tables);

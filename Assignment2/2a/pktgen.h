@@ -29,4 +29,4 @@ char* TTL[4] = {"1","2","3","4"};
 
 void random_payload(char * string, size_t length);
 char* itoa(int i, char b[]);
-void sig_handler(int sig);
+//void sig_handler(int sig);

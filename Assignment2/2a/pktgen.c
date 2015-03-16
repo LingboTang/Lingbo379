@@ -10,6 +10,7 @@
 #include <signal.h>
 #include <setjmp.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pktgen.h"
 
 #define BUFLEN 512
@@ -21,7 +22,7 @@ int main( int argc, char ** argv)
 {
 	// Sockets parameters
 	struct sockaddr_in si_me, si_other;
-	int s, i, slen=sizeof(si_other);
+	int s;
 	char buf[BUFLEN];
 
 	// If the user input the wrong command line
@@ -83,7 +84,7 @@ int main( int argc, char ** argv)
 			//	sleep(1);
 			//}
 			char buffer[32];
-			char * packet_ID = itoa(Packet_ID,buffer);
+			char* packet_ID = itoa(Packet_ID,buffer);
 			
 			// Source IP and Destination IP
 			char* source_IP;
@@ -108,7 +109,7 @@ int main( int argc, char ** argv)
 				{
 					randi2 = rand() % 8;
 				}
-				printf("%d\n",randi2);
+				//printf("%d\n",randi2);
 				if (randi2 >=2 && randi2 <5)
 				{
 					countAtoB++;
@@ -125,7 +126,7 @@ int main( int argc, char ** argv)
 				{
 					randi2 = rand() % 8;
 				}
-				printf("%d\n",randi2);
+				//printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
 				{
 					countBtoA++;
@@ -141,7 +142,7 @@ int main( int argc, char ** argv)
 				{
 					randi2 = rand() % 8;
 				}
-				printf("%d\n",randi2);
+				//printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
 				{
 					countCtoA++;
@@ -190,8 +191,9 @@ int main( int argc, char ** argv)
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
 		fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
-		close(s);
+		
 	}
+	close(s);
  	return 0;
  }
 
@@ -246,8 +248,8 @@ char* itoa(int i, char b[]){
 }
 
 // sig handler
-void sig_handler(int sig)
-{
-	stop_flag = 0;
-	
-}
+//void sig_handler(int sig)
+//{
+//	stop_flag = 0;
+//	
+//}

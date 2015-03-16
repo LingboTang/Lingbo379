@@ -1,17 +1,10 @@
-pktgen: pktgen.c pktgen.o
-	gcc -m32 -o pktgen pktgen.c
+all: router pktgen
 
-router: router.c router.o
-	gcc -m32 -o router router.c
+pktgen: pktgen.c
+	gcc -o pktgen pktgen.c
 
-pktgen.o: pktgen.c pktgen.h
-	gcc -m32 -c pktgen.c
-	gcc -m32 -c pktgen.h
-
-router.o: router.c router.h pktgen.h
-	gcc -m32 -c router.c
-	gcc -m32 -c router.h
-	gcc -m32 -c pktgen.h
+router: router.c
+	gcc -o router router.c
 
 clean:
-	rm -rf *.o *~ *.gch
+	rm -rf *.o *~ *.gch pktgen router *.txt
