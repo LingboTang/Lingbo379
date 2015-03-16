@@ -20,7 +20,7 @@
 int main(int argc, char**argv)
 {
 	struct sockaddr_in si_me, si_other;
-	int s, i, slen=sizeof(si_other);
+	int s, slen=sizeof(si_other);
 	char buf[BUFLEN];
 
 	
@@ -50,9 +50,6 @@ int main(int argc, char**argv)
 	filename2 = argv[3];
 	ofp = fopen(filename2, mode2);
 	
-	char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
 
     if (ifp == NULL)
 	{
@@ -62,25 +59,19 @@ int main(int argc, char**argv)
 	struct routing* r_table;
 	r_table = malloc(sizeof(struct routing)*3);
 	int index = 0;
-    while ((read = getline(&line, &len, ifp)) != -1) {
-		if (line[0] != '\n')
+	char line[BUFLEN];
+	while(fgets(line,sizeof(line), ifp)) {
+		if(line[0]=='\n' || line[0]=='\r' || line[0]=='\0')
 		{
-			char IP_ad[16];
-			char router[8];
-			int length;
-			sscanf(line,"%s %d %s",IP_ad,&length,router);
-			printf("%s\n",IP_ad);
-			printf("%d\n",length);
-			printf("%s\n",router);
-			r_table[index].IP_addr = IP_ad;
-			r_table[index].prefix_length = length;
-			r_table[index].nexthop = router;
+			continue;
+		}
+		else
+		{
+			sscanf(line,"%s %d %s",r_table[index].IP_addr,&r_table[index].prefix_length,r_table[index].nexthop);
 			index++;
 		}
-
-    }
+	}
 	
-
     if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
 	{
 		printf("Error in creating socket");
@@ -99,11 +90,13 @@ int main(int argc, char**argv)
 	}
 
 	strcpy(buf, argv[1]);
-	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
+	printf("Server listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
 	while (1) 
 	{
 		int i ;
 		struct statistic stat;
+		stat.Nexpired = 0; stat.Nunroutable = 0; stat.Ndelivered = 0;
+		stat.NrouterB = 0; stat.NrouterC = 0;
 		for (i =0; i<20; i++)
 		{
 			if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen) != -1)
@@ -111,7 +104,7 @@ int main(int argc, char**argv)
 				printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
 				struct ip_pack tmpdecode;
 				tmpdecode = decode_packet(buf);
-				stat = Make_Decision(tmpdecode,r_table);
+				stat = Make_Decision(tmpdecode,r_table,stat);
 			}
 		}
 		fprintf(ofp,"expired packets: %d of packets expired\n",stat.Nexpired);
@@ -181,12 +174,9 @@ int Ip_masking(char*ip,struct routing table)
 	}
 }
 
-struct statistic Make_Decision(struct ip_pack pack,struct routing* tables)
+struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct statistic stats)
 {
 	int ri = 0;
-	struct statistic stats;
-	stats.Nexpired = 0; stats.Nunroutable = 0; stats.Ndelivered = 0;
-	stats.NrouterB = 0; stats.NrouterC = 0;
 	if (decrement(pack.TTL) == 0)
 	{
 		printf("This is expired\n");
