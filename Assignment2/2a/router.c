@@ -110,31 +110,20 @@ int main(int argc, char**argv)
 			{
 				printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
 				struct ip_pack tmpdecode;
-				printf("Debug\n");
 				tmpdecode = decode_packet(buf);
-				printf("decode works\n");
 				stat = Make_Decision(tmpdecode,r_table);
-				printf("stat works\n");
 			}
 		}
-		fprintf(ofp,"expired packets: %d of packets expired",stat.Nexpired);
-		fprintf(ofp,"unroutable packets: %d of packets containing invalid detination",stat.Nunroutable);
-		fprintf(ofp,"delivered direct: %d of packets expired",stat.Ndelivered);
-		fprintf(ofp,"routerB: %d of packets forward to routerB",stat.NrouterB);
-		fprintf(ofp,"routerC: %d of packets forward to routerC",stat.NrouterC);
+		fprintf(ofp,"expired packets: %d of packets expired\n",stat.Nexpired);
+		fprintf(ofp,"unroutable packets: %d of packets containing invalid detination\n",stat.Nunroutable);
+		fprintf(ofp,"delivered direct: %d of packets expired\n",stat.Ndelivered);
+		fprintf(ofp,"routerB: %d of packets forward to routerB\n",stat.NrouterB);
+		fprintf(ofp,"routerC: %d of packets forward to routerC\n\n",stat.NrouterC);
 	}
 	free(r_table);
 	close(s);
  	return 0;
  }
-
-int fact (int n)
-{
-	if (n <= 1)
-		return 1;
-	else
-		return n * fact (n-1);
-}
 
 int decrement (int n)
 {
@@ -143,15 +132,13 @@ int decrement (int n)
 
 // Code from http://www.programmingsimplified.com/c/source-code/c-program-convert-decimal-to-binary
 
-
-
 struct ip_pack decode_packet(char* packets)
 {
 	int PACKET_ID;
-	char* source_IP;
-	char* destination_IP;
+	char source_IP[16];
+	char destination_IP[16];
 	int myTTL;
-	char* mypayload;
+	char mypayload[21];
 	struct ip_pack decode_list;
 	sscanf(packets,"%d %s %s %d %s",&PACKET_ID,source_IP,destination_IP,&myTTL,mypayload);
 	decode_list.pack_id = PACKET_ID;
@@ -198,21 +185,20 @@ struct statistic Make_Decision(struct ip_pack pack,struct routing* tables)
 {
 	int ri = 0;
 	struct statistic stats;
+	stats.Nexpired = 0; stats.Nunroutable = 0; stats.Ndelivered = 0;
+	stats.NrouterB = 0; stats.NrouterC = 0;
 	if (decrement(pack.TTL) == 0)
 	{
 		printf("This is expired\n");
 		stats.Nexpired++;
-		printf("decrement works\n");
 	}
 	else
 	{
-		printf("Debug loop\n");
 		while ((Ip_masking(pack.DestinationIP,tables[ri]) == 0) && ri < 3)
 		{
 			ri++;
 			Ip_masking(pack.DestinationIP,tables[ri]);
 		}
-		printf("loop works\n");
 		if (ri == 0)
 		{
 			stats.NrouterB++;

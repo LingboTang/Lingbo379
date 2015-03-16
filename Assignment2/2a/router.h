@@ -33,7 +33,6 @@ struct statistic
 	int NrouterC;
 };
 
-int fact (int n);
 int decrement (int n);
 char *decimal_to_binary(int n);
 struct ip_pack decode_packet(char* packets);
