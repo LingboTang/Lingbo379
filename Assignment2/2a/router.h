@@ -39,3 +39,4 @@ struct ip_pack decode_packet(char* packets);
 unsigned int IPtoDec(char*IPdot);
 int Ip_masking(char*ip,struct routing table);
 struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct statistic stats);
+void sig_handler_2(int sig);
