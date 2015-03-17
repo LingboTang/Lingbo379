@@ -83,10 +83,9 @@ int checkfile(char *path)
 int main(int argc,  char *argv[])
 {
 	struct sockaddr_in sockname, client;
-	char buffer[80], *ep;
+	char *ep;
 	struct sigaction sa;
-	socklen_t clientlen;
-        int sd;
+    int sd;
 	u_short port;
 	pid_t pid;
 	u_long p;
@@ -167,18 +166,16 @@ int main(int argc,  char *argv[])
 
 void request(struct info *i){
 	char cha[1024];
-	u_char method[1024];
-	u_char filepath[1024];
-	u_char fp[1024];
-	u_char http[1024];
+	char method[1024];
+	char filepath[1024];
+	char fp[1024];
+	char http[1024];
 	struct stat buf;
 	int fd;
 	off_t filelength;
 	int log=0;
-	int state=0;
 	off_t position;
 	off_t offset;
-	ssize_t nsize;
 	char other[1024];
 	char r2[1024];
 	int clen=0;
@@ -257,12 +254,8 @@ void headprint(int log,struct info *inf){
 	char h403b[1024]="<html><body>\r\n<h2>Permission Denied</h2>\r\nYou asked for a document you are not permitted to see. It sucks to be you.\r\n</body></html>\r\n";
 	char h500b[1024]="<html><body>\r\n<h2>Oops. That Didn't work</h2>\r\nI had some sort of problem dealing with your request. Sorry, I'm lame.\r\n</body></html>\r\n";
 	char s[50];
-	size_t i;
-	struct tm *tim;
 	time_t now;
 	time(&now);
-	tim = gmtime(&now);
-	i = strftime(s,50,"%a %d %b %Y %T %Z\n",tim);
 	if (log==0){
         	strncpy(print, h200, strlen(h200));
         	pp = print + strlen(h200);
@@ -323,15 +316,11 @@ void headprint(int log,struct info *inf){
 
 void writelog(struct info *inf,int log,char *req,off_t filelength,off_t position)
 {
-	size_t i;
-	char s[50],http[50];
+	char s[50];
 	char *logIP;
-	struct tm *tim;
 	time_t now;
 	time(&now);
-	tim = gmtime(&now);
 	FILE * logfile;
-	i = strftime(s,50,"%a %d %b %Y %T %Z",tim);
 	char h200[1024]="200 OK";
 	char h400[1024]="400 Bad Request";
 	char h404[1024]="404 Not Found";
