@@ -14,7 +14,6 @@
 #include "router.h"
 
 #define BUFLEN 512
-#define PORT 9930
 #define IP 2130706433  /* 127.0.0.1 */
 
 int main(int argc, char**argv)
@@ -34,7 +33,7 @@ int main(int argc, char**argv)
 	}
 
 	// The first argument is the port number 
-	//int portnumber = atoi(argv[1]);
+	int PORT = atoi(argv[1]);
 	
 	// The second argument is the routing table
 	char * filename1;
@@ -90,7 +89,8 @@ int main(int argc, char**argv)
 	}
 
 	strcpy(buf, argv[1]);
-	printf("Server listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
+	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
+	(void) signal(SIGINT, sig_handler_2);
 	while (1) 
 	{
 		int i ;
@@ -107,11 +107,13 @@ int main(int argc, char**argv)
 				stat = Make_Decision(tmpdecode,r_table,stat);
 			}
 		}
+		printf("\n\nOut of the loop\n\n");
 		fprintf(ofp,"expired packets: %d of packets expired\n",stat.Nexpired);
 		fprintf(ofp,"unroutable packets: %d of packets containing invalid detination\n",stat.Nunroutable);
 		fprintf(ofp,"delivered direct: %d of packets expired\n",stat.Ndelivered);
 		fprintf(ofp,"routerB: %d of packets forward to routerB\n",stat.NrouterB);
 		fprintf(ofp,"routerC: %d of packets forward to routerC\n\n",stat.NrouterC);
+		fflush(ofp);
 	}
 	free(r_table);
 	close(s);
@@ -205,7 +207,15 @@ struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct
 		else if (ri == 3)
 		{
 			stats.Nunroutable++;
+			printf("\n\nyes\n\n");
 		}
 	}
 	return stats;
 } 
+
+// sig handler
+void sig_handler_2(int sig)
+{
+	stop_flag = 0;
+	exit(0);
+}
