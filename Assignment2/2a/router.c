@@ -90,15 +90,17 @@ int main(int argc, char**argv)
 
 	strcpy(buf, argv[1]);
 	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
-	(void) signal(SIGINT, sig_handler_2);
+	//(void) signal(SIGINT, sig_handler_2);
 	while (1) 
 	{
+
 		int i ;
 		struct statistic stat;
 		stat.Nexpired = 0; stat.Nunroutable = 0; stat.Ndelivered = 0;
 		stat.NrouterB = 0; stat.NrouterC = 0;
 		for (i =0; i<20; i++)
 		{
+			(void) signal(SIGINT, sig_handler_2);
 			if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen) != -1)
 			{
 				printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
@@ -107,6 +109,8 @@ int main(int argc, char**argv)
 				stat = Make_Decision(tmpdecode,r_table,stat);
 			}
 		}
+
+		// Print the out put.
 		printf("\n\nOut of the loop\n\n");
 		fprintf(ofp,"expired packets: %d of packets expired\n",stat.Nexpired);
 		fprintf(ofp,"unroutable packets: %d of packets containing invalid detination\n",stat.Nunroutable);
@@ -116,6 +120,7 @@ int main(int argc, char**argv)
 		fflush(ofp);
 	}
 	free(r_table);
+	fclose(ofp);
 	close(s);
  	return 0;
  }
@@ -144,6 +149,12 @@ struct ip_pack decode_packet(char* packets)
 	return decode_list;
 }
 
+
+/*
+ * Transform the IP string to binary
+ * scan the string, and shift the binary bits to the
+ * correct position.
+ */
 unsigned int IPtoDec(char*IPdot) {
    int a,b,c,d;
    // Scan them to the int type
@@ -157,6 +168,12 @@ unsigned int IPtoDec(char*IPdot) {
    ip = sum;
    return ip;
 }
+
+/*
+ * Extract the <prefix_length> number of bits
+ * masking them and compare them, if equal, return 
+ * true, otherwise false.
+ */
 
 int Ip_masking(char*ip,struct routing table)
 {
@@ -175,6 +192,20 @@ int Ip_masking(char*ip,struct routing table)
 		return 0;
 	}
 }
+
+
+/*
+ * This funciton is to figure out if a package is expired
+ * unroutable, or sending to some specific routers.
+ * Once we pass in the recieved and decoded messages and routing table
+ * We can figure out this by scanning each line of the routing table.
+ * We will use the prefix_length in each line as comparing length to
+ * mask the package destination IP address. If it not matching just
+ * scan the next line until we find the match or reach to the end of the
+ * table. Since the order of the table is from rB->rA->rC, then table[0]
+ * is the router B,table[1] is the router A, table[2] is the router C.
+ * After we get those, just upgrade the counter, and store them to the stat structure.
+ */
 
 struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct statistic stats)
 {

@@ -58,13 +58,13 @@ int main( int argc, char ** argv)
 	int thisTTL;
 	int sum;
 	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
-    (void) signal(SIGINT, sig_handler);
+    //(void) signal(SIGINT, sig_handler);
     while (1)
 	{
+		(void) signal(SIGINT, sig_handler);
 		sum = 0;
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 		int i;
-		
         for (i = 0; i<20; i++)
 	    {
 	    	char *package = malloc(sizeof(char*)*20);
@@ -184,6 +184,7 @@ int main( int argc, char ** argv)
 		fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
 		fflush(ofp);
 	}
+	fclose(ofp);
 	close(s);
  	return 0;
  }
