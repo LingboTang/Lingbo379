@@ -1,15 +1,8 @@
 How to make it precisely?
-1. gcc -o server server.c
-2. gcc -o client client.c
+See make file
 
-and then ./server
-and then ./client
 
-1. Write the function to make decision by passing the destip and routing table.
-
-2. Write the function to print out the statistic file.
-
-3. Error Handeling, sleep when 2 packets are generated.
+3. Error Handeling
 
 What to do in 2b?:
 
