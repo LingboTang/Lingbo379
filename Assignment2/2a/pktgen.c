@@ -14,14 +14,12 @@
 #include "pktgen.h"
 
 #define BUFLEN 512
-#define PORT 9931
-#define SERVERPORT 9930
 #define IP 2130706433  /* 127.0.0.1 */
 
 int main( int argc, char ** argv)
 {
 	// Sockets parameters
-	struct sockaddr_in si_me, si_other;
+	struct sockaddr_in si_other;
 	int s;
 	char buf[BUFLEN];
 
@@ -34,7 +32,7 @@ int main( int argc, char ** argv)
 	}
 	
 	// The first arguement is the port number
-	//int SERVERPORT = atoi(argv[1]);
+	int SERVERPORT = atoi(argv[1]);
 
 	// The second arguement is the network log
 	char * filename;
@@ -50,11 +48,6 @@ int main( int argc, char ** argv)
 		printf("Error in creating socket");
 		return 1;
 	}
-	memset((char *) &si_me, 0, sizeof(si_me));
-	si_me.sin_family = AF_INET;
-	si_me.sin_port = htons(PORT);
-	si_me.sin_addr.s_addr = htonl(IP);    /* htonl(INADDR_ANY) for any interface on this machine */
-	//int SERVERPORT = atoi(argv[1]);
 	si_other.sin_family = AF_INET;
 	si_other.sin_port = htons(SERVERPORT);
 	si_other.sin_addr.s_addr = htonl(IP);
@@ -65,10 +58,9 @@ int main( int argc, char ** argv)
 	int thisTTL;
 	int sum;
 	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
-    //(void) signal(SIGINT, sig_handler);
+    (void) signal(SIGINT, sig_handler);
     while (1)
 	{
-		//handle_signals();
 		sum = 0;
 		countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 		int i;
@@ -79,10 +71,10 @@ int main( int argc, char ** argv)
 
 			// Package ID
 			Packet_ID++;
-			//if (Packet_ID%2 == 0)
-			//{
-			//	sleep(1);
-			//}
+			if (Packet_ID%2 == 0)
+			{
+				sleep(1);
+			}
 			char buffer[32];
 			char* packet_ID = itoa(Packet_ID,buffer);
 			
@@ -174,13 +166,12 @@ int main( int argc, char ** argv)
 			strcat(package,pktTTL);
 			strcat(package,space);
 			strcat(package,payload);
-			printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
-
 			strcpy(buf, package);
 			printf("\nSending %s to %s:%d\n", buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
 			sendto(s, buf, strlen(buf) + 1, 0, (struct sockaddr *)&si_other, sizeof(si_other));
 			free(package);
 		}
+		printf("\n\nOut of the loop\n\n");
 		sum = countAtoB+countAtoC+countBtoA+countBtoC+countCtoA+countCtoB+countInvalid;
 		// Print out the results in the network file
 		fprintf(ofp,"%d\n",sum);
@@ -191,7 +182,7 @@ int main( int argc, char ** argv)
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
 		fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
 		fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
-		
+		fflush(ofp);
 	}
 	close(s);
  	return 0;
@@ -248,8 +239,7 @@ char* itoa(int i, char b[]){
 }
 
 // sig handler
-//void sig_handler(int sig)
-//{
-//	stop_flag = 0;
-//	
-//}
+void sig_handler(int sig)
+{
+	stop_flag = 0;
+}
