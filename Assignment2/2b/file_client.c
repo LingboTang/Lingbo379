@@ -9,14 +9,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define BUFLEN 512
+#define BUFLEN 1024
 #define IP 2130706433  /* 127.0.0.1 */
+#define CHUNKLEN 1024
+#define BUFLEN2 32
 
 int main( int argc, char ** argv)
 {
 	struct sockaddr_in si_me, si_other;
 	int s, slen=sizeof(si_other);
 	char buf[BUFLEN];
+	char buf2[BUFLEN2];
 
 	
 	// If the user input the wrong command line
@@ -59,12 +62,14 @@ int main( int argc, char ** argv)
 
 	printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
 
-	strcpy(buf, argv[1]);
-	printf("\nSending %s to %s:%d\n", buf, inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
-	sendto(s, buf, strlen(buf) + 1, 0, (struct sockaddr *)&si_other, sizeof(si_other));
-
-	if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen) != -1)
-		printf("\nReceived packet from %s:%d  Fact(%s): %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), argv[1], buf);
+	if ( recvfrom(s, buf, BUFLEN+1, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen) != -1)
+	{
+		printf("\nReceived packet from %s:%d %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
+	}
+	else if ( recvfrom(s,buf2,remain+1,0,(struct sockaddr *)&si_other,(socklen_t *)&slen) != -1)
+	{
+		printf("\nReceived packet from %s:%d %s\n\n", inet_ntoa(si_other.sin_addr),ntohs(si_other.sin_port),buf2);
+	}
 
 	close(s);
  	return 0;
