@@ -1,5 +1,3 @@
-/* This server receives an integer value encoded as a string from a client through UDP socket, and sends back the factorial of that number to the client  */
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -25,7 +23,7 @@
 #define CHUNKLEN 1024
 #define BUFLEN2 32
 
-void writelog(FILE *ofp);
+void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag);
 int get_file_size(FILE*ifp);
 void split_file(char chunk[CHUNKLEN],FILE*ifp,int turn);
 
@@ -73,6 +71,13 @@ int main(int argc,char** argv)
 		printf("Error in binding the socket");
 		return 2;
 	}
+
+	printf("daemon\n");
+    //if (daemon(1,0) == -1) {
+    //    printf("ERROR: daemon() failed!!!!!! \n");
+    //    exit(EXIT_FAILURE);
+    //}
+	printf("daemon passed\n");
 
 	struct sigaction sa;
 	/*
@@ -138,6 +143,7 @@ int main(int argc,char** argv)
 				
 				ifp = fopen(filename1, "r");
 				ofp = fopen(filename2, "w");
+				int flag;
 
 				if(ifp==NULL)
 				{
@@ -145,7 +151,8 @@ int main(int argc,char** argv)
 					char error_mssg[20];
 					strcpy(error_mssg,"404 Not found!\n");
 					sendto(s,error_mssg,20,0,(struct sockaddr*)&si_client,sizeof(si_client));
-					//write_log_for_file_not_found(log_line,log_path);
+					flag = 1;
+					writelog(buffer,PORT,input_filepath,ofp,flag);
 					break;
 				}
 
@@ -158,14 +165,16 @@ int main(int argc,char** argv)
 						
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
-						//write_log_for_error_transmission(log_line,log_path);
+						flag = 2;
+						writelog(buffer,PORT,input_filepath,ofp,flag);
 						break;
 					}
 
 					turn++;
 				}
-					
-				///write_log_normally(log_line,log_path);
+				
+				flag = 0;	
+				writelog(buffer,PORT,input_filepath,ofp,flag);
 				fclose(ifp);
 				
 			}
@@ -217,24 +226,29 @@ void split_file(char chunk[CHUNKLEN],FILE*ifp,int turn)
 			break;
 		}
 	}
-
 	printf("chunk with ID: %d has been created and will be send.\n",turn);
 }
 
-/*
-void writelog(FILE *ofp)
+void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag)
 {
-	char* clientIP;
-	int clientPORT;
-	char* Filename_sent;
-	int request_time;
-	int transmission_time;
+	int request_time=2;
+	int transmission_time=3;
 	char* flag_notfound = "file not found!";
 	char* flag_notcompleted = "transmission not completed!";
-	fprintf(ofp,"%s %d %s %d %d\n",clientIP,clientPORT,Filename_sent,request_time, transmission_time);
-	fprintf(ofp,"%s %d %s %d %s\n",clientIP,clientPORT,Filename_sent,request_time, flag_notfound);
-	fprintf(ofp,"%s %d %s %d %s\n\n",clientIP,clientPORT,Filename_sent,request_time, flag_notcompleted);
-}*/
+	if (flag == 0)
+	{
+		fprintf(ofp,"%s %d %s %d %d\n",clientIP,clientPORT,Filename_sent,request_time, transmission_time);
+	}
+	else if(flag == 1)
+	{
+		fprintf(ofp,"%s %d %s %d %s\n",clientIP,clientPORT,Filename_sent,request_time, flag_notfound);
+	}
+	else if(flag == 2)
+	{
+		fprintf(ofp,"%s %d %s %d %s\n\n",clientIP,clientPORT,Filename_sent,request_time, flag_notcompleted);
+	}
+	fflush(ofp);
+}
 
 static void kidhandler(int signum) {
 	/* signal handler for SIGCHLD */
