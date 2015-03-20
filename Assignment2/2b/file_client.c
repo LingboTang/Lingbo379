@@ -37,10 +37,10 @@ int main(int argc, char **argv){
 	si_server.sin_addr.s_addr = htonl(dec_ip); 
 
 
-	if(bind(s,(struct sockaddr*)&si_client,sizeof(si_client))==-1){
-		printf("Error in binding the socket\n");
-		return 0;
-	}
+	//if(bind(s,(struct sockaddr*)&si_client,sizeof(si_client))==-1){
+	//	printf("Error in binding the socket\n");
+	//	return 0;
+	//}
 
 	printf("File Client listening to %s:%d\n",inet_ntoa(si_client.sin_addr),ntohs(si_client.sin_port));
 

@@ -36,23 +36,23 @@ int main(int argc,char** argv)
 	struct sockaddr_in si_server, si_client;
 	int s, slen=sizeof(si_client);
 
-	// If the user input the wrong command line
-	// just exit with failure
+	/* If the user input the wrong command line */
+	/* just exit with failure */
 	if ( argc != 4 )
 	{
 		printf("\n\nusage: %s <int value>\n\n", argv[0]);
 		exit(1);
 	}
 
-	// The first argument is the port number 
+	/* The first argument is the port number */
 	int PORT = atoi(argv[1]);
-	// The second argument is the routing table
-	char * filename1;
-	filename1 = argv[2];
+	/* The second argument is the requesting file path */
+	char * filepath1;
+	filepath1 = argv[2];
 	FILE *ifp;
-	// The third argument is the statistic file name
-	char * filename2;
-	filename2 = argv[3];
+	/* The third argument is the log file path */
+	char * filepath2;
+	filepath2 = argv[3];
 	FILE *ofp;
 
 	if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
@@ -75,7 +75,7 @@ int main(int argc,char** argv)
 	printf("daemon\n");
     //if (daemon(1,0) == -1) {
     //    printf("ERROR: daemon() failed!!!!!! \n");
-    //    exit(EXIT_FAILURE);
+    //   exit(EXIT_FAILURE);
     //}
 	printf("daemon passed\n");
 
@@ -114,10 +114,9 @@ int main(int argc,char** argv)
 				 * the setup filepath to the client.
 				 */
 
-				time_t recv_time = time(NULL);
 				char input_filepath[200];
 				memset(input_filepath,0,201);
-				strcpy(input_filepath,filename1);
+				strcpy(input_filepath,filepath1);
 				strcat(input_filepath,"/");
 				strcat(input_filepath,buffer);
 				printf("File path found: %s\n",input_filepath);
@@ -126,23 +125,20 @@ int main(int argc,char** argv)
 				 * Set up the file path for
 				 * our server log.
 				 */
+				char logger[8] = "log.txt";
 				char output_filepath[256];
 				memset(output_filepath,0,256);
 				char client_port[5];
 				memset(client_port,0,6);
 				sprintf(client_port,"%d",ntohs(si_client.sin_port));
-				strcat(output_filepath," ");
-				strcat(output_filepath,client_port);
-				strcat(output_filepath," ");
-				strcat(output_filepath,filename2);
-				strcat(output_filepath," ");
-				strcat(output_filepath,ctime(&recv_time));
-				strcat(output_filepath," ");
-
+				strcpy(output_filepath,filepath2);
+				strcat(output_filepath,"/");
+				strcat(output_filepath,logger);
+				printf("%s\n",logger);
 				
 				
-				ifp = fopen(filename1, "r");
-				ofp = fopen(filename2, "w");
+				ifp = fopen(filepath1, "r");
+				ofp = fopen(filepath2, "w");
 				int flag;
 
 				if(ifp==NULL)
@@ -176,7 +172,7 @@ int main(int argc,char** argv)
 				flag = 0;	
 				writelog(buffer,PORT,input_filepath,ofp,flag);
 				fclose(ifp);
-				
+				exit(0);
 			}
 			else if (pid == -1)
 			{

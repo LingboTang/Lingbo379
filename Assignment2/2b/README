@@ -1,3 +1,26 @@
-server_f: c program implement folk server
+Course: CMPUT379
+Student: Lingbo Tang
+SID: 1353070
 
-Makefile
+This is the Assignment2 partB.
+
+
+How to run this?
+
+	1. Open the terminal and type make or make all.
+	2. After you compine all the files run router first and then pktgen
+	3. The command line of router is:
+		./file_server <ServerPORT> <server_directory> <log_directory>
+		Here, server_directory should be a different directory. So does the log_directory.
+		The server is daemonized.
+	4. The command line of client is:
+		./file_client <ServerIP> <ServerPort> <request_file>
+		Here, you should give the same port number as server, because you want your
+		pktgen listen to the router. You get the ServerIP manually by typing "ifconfig"
+		and then type your ServerIP into the command line. Then the request_file is the
+		file name you want to get in the server.
+	5. If you want to stop just type ctrl+C, it will save the instant value for you.
+
+	6. After exit. make clean to clean the junk file and open the log files to check results.
+
+Thanks!

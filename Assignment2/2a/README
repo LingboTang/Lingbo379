@@ -1,9 +1,24 @@
-How to make it precisely?
-See make file
+Course: CMPUT379
+Student: Lingbo Tang
+SID: 1353070
+
+This is the Assignment2 partA.
 
 
-3. Error Handeling
+How to run this?
 
-What to do in 2b?:
+	1. Open the terminal and type make or make all.
+	2. After you compine all the files run router first and then pktgen
+	3. The command line of router is:
+		./router <RouterPORT> <Routing_table> <statistic_log>
+		Here, routing_table should be in the same directory with router and pktgen.
+		And the file name is "RT_A.txt"
+	4. The command line of client is:
+		./pktgen <RouterPORT> <pktgen_log>
+		Here, you should give the same port number as router, because you want your
+		pktgen listen to the router.
+	5. If you want to stop just type ctrl+C, it will save the instant value for you.
 
-Server is done, Just need to modify it to make it fit the client.
+	6. After exit. make clean to clean the junk file and open the log files to check results.
+
+Thanks!
