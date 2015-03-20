@@ -16,8 +16,8 @@
 
 int main( int argc, char ** argv)
 {
-	struct sockaddr_in si_me, si_other;
-	int s, slen=sizeof(si_other);
+	struct sockaddr_in si_client, si_server;
+	int s, slen=sizeof(si_server);
 	char buf[BUFLEN];
 	char buf2[BUFLEN2];
 
@@ -49,26 +49,26 @@ int main( int argc, char ** argv)
 		return 1;
 	}
 
-	memset((char *) &si_me, 0, sizeof(si_me));
-	si_other.sin_family = AF_INET;
-	si_other.sin_port = htons(SERVERPORT);
-	si_other.sin_addr.s_addr = htonl(IP); 
+	memset((char *) &si_client, 0, sizeof(si_client));
+	si_server.sin_family = AF_INET;
+	si_server.sin_port = htons(SERVERPORT);
+	si_server.sin_addr.s_addr = htonl(IP); 
 
-	if ( bind(s, (struct sockaddr *)&si_me, sizeof(si_me)) == -1 )
+	if ( bind(s, (struct sockaddr *)&si_client, sizeof(si_client)) == -1 )
 	{
 		printf("Error in binding the socket");
 		return 2;
 	}
 
-	printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_me.sin_addr), ntohs(si_me.sin_port));
+	printf("\n\nClient listening to %s:%d\n\n", inet_ntoa(si_client.sin_addr), ntohs(si_client.sin_port));
 
-	if ( recvfrom(s, buf, BUFLEN+1, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen) != -1)
+	if ( recvfrom(s, buf, BUFLEN+1, 0, (struct sockaddr *)&si_server, (socklen_t *)&slen) != -1)
 	{
-		printf("\nReceived packet from %s:%d %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
+		printf("\nReceived packet from %s:%d %s\n\n", inet_ntoa(si_server.sin_addr), ntohs(si_server.sin_port), buf);
 	}
-	else if ( recvfrom(s,buf2,remain+1,0,(struct sockaddr *)&si_other,(socklen_t *)&slen) != -1)
+	else if ( recvfrom(s,buf2,remain+1,0,(struct sockaddr *)&si_server,(socklen_t *)&slen) != -1)
 	{
-		printf("\nReceived packet from %s:%d %s\n\n", inet_ntoa(si_other.sin_addr),ntohs(si_other.sin_port),buf2);
+		printf("\nReceived packet from %s:%d %s\n\n", inet_ntoa(si_server.sin_addr),ntohs(si_server.sin_port),buf2);
 	}
 
 	close(s);
