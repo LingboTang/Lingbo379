@@ -22,9 +22,9 @@
 #define CHUNKLEN 1024
 #define BUFLEN2 32
 
-void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag);
+void writelog(char *clientIP,int clientPORT,char* Filename_sent,char *request_time,char *transmission_time,FILE *ofp,int flag);
 int get_file_size(FILE*ifp);
-char* itoa(int i, char b[]);
+char* get_time();
 
 static void kidhandler(int signum);
 
@@ -68,11 +68,8 @@ int main(int argc,char** argv)
 	si_server.sin_addr.s_addr = htonl(INADDR_ANY); /* htonl(INADDR_ANY) for any interface on this machine */
 	
 
-	//printf("daemon\n");
     //if (daemon(1,0) == -1) 
     //    printf("ERROR: daemon() failed!!!!!! \n");
-
-	//printf("daemon passed\n");
 
 	if ( bind(s, (struct sockaddr *)&si_server, sizeof(si_server)) == -1 )
 	{
@@ -108,6 +105,10 @@ int main(int argc,char** argv)
 	char output_filepath[256];
 	memset(output_filepath,0,256);
 
+	char*req_time;
+	char* tras_time = NULL;
+	
+
 	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_server.sin_addr), ntohs(si_server.sin_port));
 	while (1) 
 	{	
@@ -120,12 +121,10 @@ int main(int argc,char** argv)
 				 * Get client ID and send the package from
 				 * the setup filepath to the client.
 				 */
-				
+				req_time = get_time();
 				strcpy(input_filepath,filepath1);
 				strcat(input_filepath,"/");
-				printf("%s\n",buffer);
 				strcat(input_filepath,buffer);
-				printf("%s\n",input_filepath);
 				printf("File path found: %s\n",input_filepath);
 
 				/*
@@ -150,7 +149,7 @@ int main(int argc,char** argv)
 					strcpy(error_mssg,"404 Not found!\n");
 					sendto(s,error_mssg,20,0,(struct sockaddr*)&si_client,sizeof(si_client));
 					flag = 1;
-					writelog(buffer,PORT,input_filepath,ofp,flag);
+					writelog(buffer,PORT,input_filepath,req_time,tras_time,ofp,flag);
 					break;
 				}
 
@@ -178,13 +177,15 @@ int main(int argc,char** argv)
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
 						flag = 2;
-						writelog(buffer,PORT,input_filepath,ofp,flag);
+						writelog(buffer,PORT,input_filepath,req_time,tras_time,ofp,flag);
 						break;
 					}
 				}
 				
+				tras_time = get_time();
+				printf("%s\n",tras_time);
 				flag = 0;	
-				writelog(buffer,PORT,input_filepath,ofp,flag);
+				writelog(buffer,PORT,input_filepath,req_time,tras_time,ofp,flag);
 				fclose(ifp);
 				exit(0);
 			}
@@ -215,23 +216,33 @@ int get_file_size(FILE*ifp)
 }
 
 
-void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag)
+char* get_time()
 {
-	int request_time=2;
-	int transmission_time=3;
+	char s[80];
+	memset(s,0,81);
+	struct tm *tim;
+	time_t now;
+	time(&now);
+	tim = localtime(&now);
+	strftime(s,80,"%a %d %b %Y %T %Z",tim);
+	return strdup(s);
+}
+
+void writelog(char *clientIP,int clientPORT,char* Filename_sent,char *request_time,char *transmission_time,FILE *ofp,int flag)
+{
 	char* flag_notfound = "file not found!";
 	char* flag_notcompleted = "transmission not completed!";
 	if (flag == 0)
 	{
-		fprintf(ofp,"%s %d %s %d %d\n",clientIP,clientPORT,Filename_sent,request_time, transmission_time);
+		fprintf(ofp,"%s %d %s %s %s\n",clientIP,clientPORT,Filename_sent,request_time, transmission_time);
 	}
 	else if(flag == 1)
 	{
-		fprintf(ofp,"%s %d %s %d %s\n",clientIP,clientPORT,Filename_sent,request_time, flag_notfound);
+		fprintf(ofp,"%s %d %s %s %s\n",clientIP,clientPORT,Filename_sent,request_time, flag_notfound);
 	}
 	else if(flag == 2)
 	{
-		fprintf(ofp,"%s %d %s %d %s\n\n",clientIP,clientPORT,Filename_sent,request_time, flag_notcompleted);
+		fprintf(ofp,"%s %d %s %s %s\n\n",clientIP,clientPORT,Filename_sent,request_time, flag_notcompleted);
 	}
 	fflush(ofp);
 }
