@@ -23,4 +23,7 @@ How to run this?
 
 	6. After exit. make clean to clean the junk file and open the log files to check results.
 
+	7. make ps is to check the daemonized, and kill it by process ID.
+		kill <pid>
+
 Thanks!
