@@ -25,7 +25,7 @@
 
 void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag);
 int get_file_size(FILE*ifp);
-void split_file(char chunk[CHUNKLEN],FILE*ifp,int turn);
+
 
 static void kidhandler(int signum);
 
@@ -55,6 +55,8 @@ int main(int argc,char** argv)
 	filepath2 = argv[3];
 	FILE *ofp;
 
+	
+
 	if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
 	{
 		printf("Error in creating socket");
@@ -66,18 +68,17 @@ int main(int argc,char** argv)
 	si_server.sin_port = htons(PORT);
 	si_server.sin_addr.s_addr = htonl(IP); /* htonl(INADDR_ANY) for any interface on this machine */
 
+	//printf("daemon\n");
+    //if (daemon(1,0) == -1) 
+    //    printf("ERROR: daemon() failed!!!!!! \n");
+
+	//printf("daemon passed\n");
+
 	if ( bind(s, (struct sockaddr *)&si_server, sizeof(si_server)) == -1 )
 	{
 		printf("Error in binding the socket");
 		return 2;
 	}
-
-	printf("daemon\n");
-    //if (daemon(1,0) == -1) {
-    //    printf("ERROR: daemon() failed!!!!!! \n");
-    //   exit(EXIT_FAILURE);
-    //}
-	printf("daemon passed\n");
 
 	struct sigaction sa;
 	/*
@@ -105,7 +106,6 @@ int main(int argc,char** argv)
 		if(recvfrom(s,buffer,100,0,(struct sockaddr *)&si_client,(socklen_t *)&slen)!=-1)
 		{	
 			pid_t pid = fork();
-
 			if (pid == 0)
 			{
 
@@ -113,7 +113,6 @@ int main(int argc,char** argv)
 				 * Get client ID and send the package from
 				 * the setup filepath to the client.
 				 */
-
 				char input_filepath[200];
 				memset(input_filepath,0,201);
 				strcpy(input_filepath,filepath1);
@@ -154,19 +153,33 @@ int main(int argc,char** argv)
 
 				char chunk[CHUNKLEN];
 
-				int turn=0;
-				while(!feof(ifp))
-				{	
-					split_file(chunk,ifp,turn);
-						
+				while(!feof(ifp)){
+					memset(chunk,0,CHUNKLEN+1);
+					int c;
+					int index;
+					for(index = 0; index< CHUNKLEN; index++)
+					{
+						c = fgetc(ifp);
+						if (c!=EOF)
+						{
+							strcat(chunk,(char*)&c);
+						}
+						if(feof(ifp))
+						{
+							if(index == 0)
+							{
+								strcat(chunk,"$");
+							}
+							break;
+						}
+					}
+					sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client));
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
 						flag = 2;
 						writelog(buffer,PORT,input_filepath,ofp,flag);
 						break;
 					}
-
-					turn++;
 				}
 				
 				flag = 0;	
@@ -200,30 +213,6 @@ int get_file_size(FILE*ifp)
 	return counter;
 }
 
-
-void split_file(char chunk[CHUNKLEN],FILE*ifp,int turn)
-{
-	memset(chunk,0,CHUNKLEN+1);
-	int c;
-	int index;
-	for(index = 0; index< CHUNKLEN; index++)
-	{
-		c = fgetc(ifp);
-		if (c!=EOF)
-		{
-			strcat(chunk,(char*)&c);
-		}
-		if(feof(ifp))
-		{
-			if(index == 0)
-			{
-				strcat(chunk,"$");
-			}
-			break;
-		}
-	}
-	printf("chunk with ID: %d has been created and will be send.\n",turn);
-}
 
 void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag)
 {

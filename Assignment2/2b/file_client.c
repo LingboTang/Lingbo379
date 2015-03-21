@@ -27,20 +27,19 @@ int main(int argc, char **argv){
 	
 	int port=atoi(argv[2]);
 
-	memset((char *)&si_client,0,sizeof(si_client));
 	si_client.sin_family = AF_INET;
-	si_client.sin_port = htons(port);
-	si_client.sin_addr.s_addr = htonl(dec_ip);    /* htonl(INADDR_ANY) for any interface on this machine */
-
+	si_client.sin_port = htons(port+1);
+	si_client.sin_addr.s_addr = htonl(dec_ip); 
+	
 	si_server.sin_family = AF_INET;
-	si_server.sin_port = htons(9090);
+	si_server.sin_port = htons(port);
 	si_server.sin_addr.s_addr = htonl(dec_ip); 
 
 
-	//if(bind(s,(struct sockaddr*)&si_client,sizeof(si_client))==-1){
-	//	printf("Error in binding the socket\n");
-	//	return 0;
-	//}
+	if(bind(s,(struct sockaddr*)&si_client,sizeof(si_client))==-1){
+		printf("Error in binding the socket\n");
+		return 0;
+	}
 
 	printf("File Client listening to %s:%d\n",inet_ntoa(si_client.sin_addr),ntohs(si_client.sin_port));
 
@@ -50,14 +49,14 @@ int main(int argc, char **argv){
 	char chunk[CHUNKLEN];
 
 	struct timeval tv;
-	tv.tv_sec = 5;
+	tv.tv_sec = 10;
 	tv.tv_usec = 0;
 	
 	setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 
 	while(1){
 		
-		if(recvfrom(s,chunk,CHUNKLEN,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
+		if(recvfrom(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
 			
 			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char *)&tv,sizeof(struct timeval));
 
