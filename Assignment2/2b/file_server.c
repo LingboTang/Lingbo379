@@ -25,7 +25,7 @@
 
 void writelog(char *clientIP,int clientPORT,char* Filename_sent,FILE *ofp,int flag);
 int get_file_size(FILE*ifp);
-
+char* itoa(int i, char b[]);
 
 static void kidhandler(int signum);
 
@@ -127,19 +127,15 @@ int main(int argc,char** argv)
 				char logger[8] = "log.txt";
 				char output_filepath[256];
 				memset(output_filepath,0,256);
-				char client_port[5];
-				memset(client_port,0,6);
-				sprintf(client_port,"%d",ntohs(si_client.sin_port));
 				strcpy(output_filepath,filepath2);
 				strcat(output_filepath,"/");
 				strcat(output_filepath,logger);
-				printf("%s\n",logger);
+				printf("%s\n",output_filepath);
 				
 				
-				ifp = fopen(filepath1, "r");
-				ofp = fopen(filepath2, "w");
+				ifp = fopen(input_filepath, "r");
+				ofp = fopen(output_filepath, "w");
 				int flag;
-
 				if(ifp==NULL)
 				{
 					fprintf(stderr,"File not found.\n");
@@ -152,7 +148,6 @@ int main(int argc,char** argv)
 				}
 
 				char chunk[CHUNKLEN];
-
 				while(!feof(ifp)){
 					memset(chunk,0,CHUNKLEN+1);
 					int c;
@@ -173,7 +168,7 @@ int main(int argc,char** argv)
 							break;
 						}
 					}
-					sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client));
+					//sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client));
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
 						flag = 2;

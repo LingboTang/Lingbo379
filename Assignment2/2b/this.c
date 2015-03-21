@@ -23,10 +23,24 @@
 
 int main()
 {
-	char *filename = "test2.txt";
+	char *filename = "/home/lingbo/Server/test2.txt";
 	FILE *ifp;
 	ifp = fopen(filename,"r");
 	char chunk[CHUNKLEN];
+
+	FILE *ofp;
+
+	char logger[8] = "log.txt";
+	char filepath2[32];
+	memset(filepath2,0,33);
+	strcpy(filepath2,"/home/lingbo/Serverlog");
+	char output_filepath[256];
+	memset(output_filepath,0,256);
+	strcpy(output_filepath,filepath2);
+	strcat(output_filepath,"/");
+	strcat(output_filepath,logger);
+	printf("%s\n",output_filepath);
+	ofp = fopen(output_filepath,"w");
 
 	while(!feof(ifp)){
 		memset(chunk,0,CHUNKLEN+1);
@@ -44,8 +58,8 @@ int main()
 				break;
 			}
 		}
-		printf("\n\n=========%d================\n\n",strlen(chunk));
-		printf("%s",chunk);
+		//printf("\n\n=========%d================\n\n",strlen(chunk));
+		//printf("%s",chunk);
 	}
 	return 0;
 }

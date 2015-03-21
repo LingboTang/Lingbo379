@@ -23,8 +23,6 @@ int main(int argc, char **argv){
 	}
 
 	int dec_ip=IPtoDec(argv[1]);
-	printf("%d\n",dec_ip);
-	
 	int port=atoi(argv[2]);
 
 	si_client.sin_family = AF_INET;
@@ -49,7 +47,7 @@ int main(int argc, char **argv){
 	char chunk[CHUNKLEN];
 
 	struct timeval tv;
-	tv.tv_sec = 10;
+	tv.tv_sec = 5;
 	tv.tv_usec = 0;
 	
 	setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
@@ -57,19 +55,10 @@ int main(int argc, char **argv){
 	while(1){
 		
 		if(recvfrom(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
+			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 			
-			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char *)&tv,sizeof(struct timeval));
-
-			if(strncmp(chunk,"404 Not Found!\n",19)==0){
-				printf("Server cannot find the file,exit the program.\n");
-				break;
-			}
-			
-			printf("%s\n",chunk);
+			printf("%s",chunk);
 		}
-		
-		printf("Server time out, exit the program.\n");
-		break;
 		
 	}
 	
