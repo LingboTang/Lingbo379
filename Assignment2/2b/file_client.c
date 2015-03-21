@@ -41,22 +41,22 @@ int main(int argc, char **argv){
 
 	printf("File Client listening to %s:%d\n",inet_ntoa(si_client.sin_addr),ntohs(si_client.sin_port));
 
+	printf("%s\n",argv[3]);
 	printf("Sending %s to %s:%d\n",argv[3],inet_ntoa(si_server.sin_addr),ntohs(si_server.sin_port));
 	sendto(s,argv[3],strlen(argv[3])+1,0,(struct sockaddr*)&si_server, sizeof(si_server));
 
 	char chunk[CHUNKLEN];
 
-	struct timeval tv;
-	tv.tv_sec = 5;
-	tv.tv_usec = 0;
+	//struct timeval tv;
+	//tv.tv_sec = 5;
+	//tv.tv_usec = 0;
 	
-	setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
+	//setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 
 	while(1){
 		
 		if(recvfrom(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
-			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
-			
+			//setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 			printf("%s",chunk);
 		}
 		

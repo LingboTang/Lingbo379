@@ -26,4 +26,9 @@ How to run this?
 	7. make ps is to check the daemonized, and kill it by process ID.
 		kill <pid>
 
+	Sample tests:
+		./file_server 9090 /cshome/lingbo/Server /cshome/lingbo/Serverlog
+		./file_client 127.0.0.1 9090 test2.txt
+
+
 Thanks!

@@ -97,8 +97,14 @@ int main(int argc,char** argv)
         err(1, "sigaction failed");
 	}
 
+	char input_filepath[200];
+	memset(input_filepath,0,201);
+
 	char buffer[100];
 	memset(buffer,0,101);
+	char logger[8] = "log.txt";
+	char output_filepath[256];
+	memset(output_filepath,0,256);
 
 	printf("\n\nServer listening to %s:%d\n\n", inet_ntoa(si_server.sin_addr), ntohs(si_server.sin_port));
 	while (1) 
@@ -108,25 +114,24 @@ int main(int argc,char** argv)
 			pid_t pid = fork();
 			if (pid == 0)
 			{
-
 				/* 
 				 * Get client ID and send the package from
 				 * the setup filepath to the client.
 				 */
-				char input_filepath[200];
-				memset(input_filepath,0,201);
+				
 				strcpy(input_filepath,filepath1);
 				strcat(input_filepath,"/");
+				printf("%s\n",buffer);
 				strcat(input_filepath,buffer);
+				printf("%s\n",input_filepath);
 				printf("File path found: %s\n",input_filepath);
 
 				/*
 				 * Set up the file path for
 				 * our server log.
 				 */
-				char logger[8] = "log.txt";
-				char output_filepath[256];
-				memset(output_filepath,0,256);
+				
+				
 				strcpy(output_filepath,filepath2);
 				strcat(output_filepath,"/");
 				strcat(output_filepath,logger);
