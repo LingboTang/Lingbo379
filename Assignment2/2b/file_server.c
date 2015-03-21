@@ -131,7 +131,7 @@ int main(int argc,char** argv)
 				 * Set up the file path for
 				 * our server log.
 				 */
-				
+				int client_port = ntohs(si_client.sin_port);
 				
 				strcpy(output_filepath,filepath2);
 				strcat(output_filepath,"/");
@@ -149,7 +149,7 @@ int main(int argc,char** argv)
 					strcpy(error_mssg,"404 Not found!\n");
 					sendto(s,error_mssg,20,0,(struct sockaddr*)&si_client,sizeof(si_client));
 					flag = 1;
-					writelog(buffer,PORT,input_filepath,req_time,tras_time,ofp,flag);
+					writelog(buffer,client_port,input_filepath,req_time,tras_time,ofp,flag);
 					break;
 				}
 
@@ -177,7 +177,7 @@ int main(int argc,char** argv)
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
 						flag = 2;
-						writelog(buffer,PORT,input_filepath,req_time,tras_time,ofp,flag);
+						writelog(buffer,client_port,input_filepath,req_time,tras_time,ofp,flag);
 						break;
 					}
 				}
@@ -185,7 +185,7 @@ int main(int argc,char** argv)
 				tras_time = get_time();
 				printf("%s\n",tras_time);
 				flag = 0;	
-				writelog(buffer,PORT,input_filepath,req_time,tras_time,ofp,flag);
+				writelog(buffer,client_port,input_filepath,req_time,tras_time,ofp,flag);
 				fclose(ifp);
 				exit(0);
 			}

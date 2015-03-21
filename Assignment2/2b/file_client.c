@@ -57,6 +57,11 @@ int main(int argc, char **argv){
 		
 		if(recvfrom(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
 			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
+			
+			if(strncmp(chunk,"404 Not Found!\n",19)==0){
+				printf("Server cannot find the file,exit the program.\n");
+				break;
+			}
 			printf("%s",chunk);
 		}
 		
