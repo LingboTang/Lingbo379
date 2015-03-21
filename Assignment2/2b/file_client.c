@@ -11,7 +11,7 @@
 
 #define CHUNKLEN 1024
 
-unsigned int IPtoDec(char*IPdot);
+unsigned long ip_aton(const char *cp);
 
 int main(int argc, char **argv){
 	struct sockaddr_in si_client,si_server;
@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 		return 0;
 	}
 
-	int dec_ip=IPtoDec(argv[1]);
+	unsigned long dec_ip=ip_aton(argv[1]);
 	int port=atoi(argv[2]);
 
 	si_client.sin_family = AF_INET;
@@ -47,16 +47,16 @@ int main(int argc, char **argv){
 
 	char chunk[CHUNKLEN];
 
-	//struct timeval tv;
-	//tv.tv_sec = 5;
-	//tv.tv_usec = 0;
+	struct timeval tv;
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
 	
-	//setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
+	setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 
 	while(1){
 		
 		if(recvfrom(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
-			//setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
+			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 			printf("%s",chunk);
 		}
 		
@@ -68,21 +68,56 @@ int main(int argc, char **argv){
  	return 0;
  }
 
-/*
- * Transform the IP string to binary
- * scan the string, and shift the binary bits to the
- * correct position.
- */
-unsigned int IPtoDec(char*IPdot) {
-   int a,b,c,d;
-   // Scan them to the int type
-   sscanf(IPdot,"%d.%d.%d.%d",&a,&b,&c,&d);
-   unsigned int ip;
-   // Bit shifting to the correct position
-   unsigned int thisa = a<<24;
-   unsigned int thisb = b<<16;
-   unsigned int thisc = c<<8;
-   unsigned int sum = thisa+thisb+thisc+d;
-   ip = sum;
-   return ip;
+
+/* http://courses.cs.vt.edu/cs4254/spring06/unpv13e/libfree/inet_aton.c */
+unsigned long ip_aton(const char *cp)
+{
+
+    int dots = 0;
+    register u_long acc = 0, addr = 0;
+
+    do {
+	register char cc = *cp;
+
+	switch (cc) {
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+	    acc = acc * 10 + (cc - '0');
+	    break;
+
+	case '.':
+	    if (++dots > 3) {
+		return 0;
+	    }
+	    /* Fall through */
+
+	case '\0':
+	    if (acc > 255) {
+		return 0;
+	    }
+	    addr = addr << 8 | acc;
+	    acc = 0;
+	    break;
+
+	default:
+	    return 0;
+	}
+    } while (*cp++) ;
+
+    /* Normalize the address */
+    if (dots < 3) {
+	addr <<= 8 * (3 - dots) ;
+    }
+
+	//printf("%ld\n",(long)addr);
+
+    return 0;    
 }

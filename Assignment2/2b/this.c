@@ -29,6 +29,7 @@ int main()
 	char chunk[CHUNKLEN];
 
 	FILE *ofp;
+	
 
 	char logger[8] = "log.txt";
 	char filepath2[32];

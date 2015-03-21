@@ -19,7 +19,6 @@
 #include <arpa/inet.h>
 
 #define BUFLEN 1024
-#define IP 2130706433  /* 127.0.0.1 */
 #define CHUNKLEN 1024
 #define BUFLEN2 32
 
@@ -66,7 +65,8 @@ int main(int argc,char** argv)
 	memset((char *) &si_server, 0, sizeof(si_server));
 	si_server.sin_family = AF_INET;
 	si_server.sin_port = htons(PORT);
-	si_server.sin_addr.s_addr = htonl(IP); /* htonl(INADDR_ANY) for any interface on this machine */
+	si_server.sin_addr.s_addr = htonl(INADDR_ANY); /* htonl(INADDR_ANY) for any interface on this machine */
+	
 
 	//printf("daemon\n");
     //if (daemon(1,0) == -1) 
@@ -79,6 +79,8 @@ int main(int argc,char** argv)
 		printf("Error in binding the socket");
 		return 2;
 	}
+	
+		
 
 	struct sigaction sa;
 	/*
@@ -173,7 +175,6 @@ int main(int argc,char** argv)
 							break;
 						}
 					}
-					//sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client));
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
 						flag = 2;
