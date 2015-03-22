@@ -80,8 +80,15 @@ int main( int argc, char ** argv)
 			
 			// Source IP and Destination IP
 			char* source_IP;
-			int randi1 = rand() % (8-0 + 1) + 0;
-			int randi2 = rand() % (9-0 + 1) + 1;
+			int randi1 = rand() % 9;
+			int randi2 = rand() % 10;
+			
+			while (randi1 == randi2 || (randi1 <=1 && randi2<=1)
+					|| (randi1>1 && randi1<=4 && randi2>1 && randi2 <=4)
+					|| (randi1>4 && randi1 <=8 && randi2>4 && randi2<=8))
+			{
+				randi2 = rand()%10;
+			}
 			
 			source_IP = networks[randi1];
 			
@@ -97,11 +104,6 @@ int main( int argc, char ** argv)
 			}
 			else if (randi1>=0 && randi1< 2 && randi2 <9)
 			{
-				while (randi2>=0 && randi2 <2)
-				{
-					randi2 = rand() % 8;
-				}
-				//printf("%d\n",randi2);
 				if (randi2 >=2 && randi2 <5)
 				{
 					countAtoB++;
@@ -114,11 +116,7 @@ int main( int argc, char ** argv)
 			}
 			else if (randi1 >=2 && randi1 < 5 && randi2 < 9)
 			{
-				while (randi2 >=2 && randi2 <5)
-				{
-					randi2 = rand() % 8;
-				}
-				//printf("%d\n",randi2);
+
 				if (randi2>=0 && randi2 <2)
 				{
 					countBtoA++;
@@ -130,11 +128,6 @@ int main( int argc, char ** argv)
 			}
 			else if (randi1 >=5 && randi1 < 9 && randi2 < 9)
 			{	
-				while (randi2 >=5 && randi2 <9)
-				{
-					randi2 = rand() % 8;
-				}
-				//printf("%d\n",randi2);
 				if (randi2>=0 && randi2 <2)
 				{
 					countCtoA++;

@@ -1,0 +1,9 @@
+20
+networkA to networkB <2 of packets generated with source host in networkA and destination host in networkB>
+networkA to networkC <1 of packets generated with source host in networkA and destination host in networkC>
+networkB to networkA <2 of packets generated with source host in networkB and destination host in networkA>
+networkB to networkC <1 of packets generated with source host in networkB and destination host in networkC>
+networkC to networkA <3 of packets generated with source host in networkC and destination host in networkA>
+networkC to networkB <8 of packets generated with source host in networkC and destination host in networkB>
+Invalid Destination: <3 of packets generated with invalid destination>
+

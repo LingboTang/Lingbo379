@@ -138,7 +138,7 @@ struct ip_pack decode_packet(char* packets)
 	char source_IP[16];
 	char destination_IP[16];
 	int myTTL;
-	char mypayload[21];
+	char mypayload[20];
 	struct ip_pack decode_list;
 	sscanf(packets,"%d %s %s %d %s",&PACKET_ID,source_IP,destination_IP,&myTTL,mypayload);
 	decode_list.pack_id = PACKET_ID;
