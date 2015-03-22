@@ -1,6 +1,0 @@
-expired packets: 7 of packets expired
-unroutable packets: 0 of packets containing invalid detination
-delivered direct: 0 of packets expired
-routerB: 13 of packets forward to routerB
-routerC: 0 of packets forward to routerC
-
