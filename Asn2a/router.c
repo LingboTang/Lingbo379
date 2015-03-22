@@ -1,15 +1,3 @@
-/* This server receives an integer value encoded as a string from a client through UDP socket, and sends back the factorial of that number to the client  */
-
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <math.h>
 #include "pktgen.h"
 #include "router.h"
 
@@ -22,6 +10,8 @@ static void usage()
 	fprintf(stderr,"usage: %s <ServerPORT> <RoutingTable> <StatFile>\n",__progname);
 	exit(EXIT_FAILURE);
 }
+
+void update_log(struct statistic,FILE *ofp);
 
 int main(int argc, char**argv)
 {
@@ -90,6 +80,7 @@ int main(int argc, char**argv)
 		}
 	}
 	
+
     if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
 	{
 		printf("Error in creating socket");
@@ -114,14 +105,14 @@ int main(int argc, char**argv)
 	struct statistic stat;
 	stat.Nexpired = 0; stat.Nunroutable = 0; stat.Ndelivered = 0;
 	stat.NrouterB = 0; stat.NrouterC = 0;
+	(void) signal(SIGINT, sig_handler_2);
 	while (stop_flag) 
 	{
 		counter++;
-
 		if ( recvfrom(s, buf, BUFLEN, 0, (struct sockaddr *)&si_other, (socklen_t *)&slen) != -1)
 		{
 			printf("\nReceived packet from %s:%d  Data: %s\n\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port), buf);
-			struct ip_pack tmpdecode;
+			struct ip_pack *tmpdecode;
 			tmpdecode = decode_packet(buf);
 			stat = Make_Decision(tmpdecode,r_table,stat);
 		}
@@ -130,18 +121,13 @@ int main(int argc, char**argv)
 		/* Print the out put. */
 		if ((counter%20) ==0)
 		{
-			fprintf(ofp,"expired packets: %d of packets expired\n",stat.Nexpired);
-			fprintf(ofp,"unroutable packets: %d of packets containing invalid detination\n",stat.Nunroutable);
-			fprintf(ofp,"delivered direct: %d of packets expired\n",stat.Ndelivered);
-			fprintf(ofp,"routerB: %d of packets forward to routerB\n",stat.NrouterB);
-			fprintf(ofp,"routerC: %d of packets forward to routerC\n\n",stat.NrouterC);
-			fflush(ofp);
-			stat.Nexpired = 0; stat.Nunroutable = 0; stat.Ndelivered = 0;
-			stat.NrouterB = 0; stat.NrouterC = 0;
+			update_log(stat,ofp);
 		}
-		(void) signal(SIGINT, sig_handler_2);
+		
 	}
 	free(r_table);
+	update_log(stat,ofp);
+	fclose(ifp);
 	fclose(ofp);
 	close(s);
  	return 0;
@@ -154,20 +140,26 @@ int decrement (int n)
 
 /* Code from http://www.programmingsimplified.com/c/source-code/c-program-convert-decimal-to-binary */
 
-struct ip_pack decode_packet(char* packets)
+struct ip_pack* decode_packet(char* packets)
 {
 	int PACKET_ID;
-	char source_IP[16];
-	char destination_IP[16];
+	char *source_IP = malloc(sizeof(char) * 16);
+	bzero(source_IP, 16);
+	char *destination_IP = malloc(sizeof(char) * 16);
+	bzero(destination_IP,16);
 	int myTTL;
-	char mypayload[20];
-	struct ip_pack decode_list;
-	sscanf(packets,"%d %s %s %d %s",&PACKET_ID,source_IP,destination_IP,&myTTL,mypayload);
-	decode_list.pack_id = PACKET_ID;
-	decode_list.SourceIP = source_IP;
-	decode_list.DestinationIP = destination_IP;
-	decode_list.TTL = myTTL;
-	decode_list.payload = mypayload;
+	char *mypayload = malloc(sizeof(char) * 20);
+	bzero(mypayload,20);
+	struct ip_pack *decode_list = malloc(sizeof(struct ip_pack));
+	sscanf(packets,"%d %s %s %d %s",&PACKET_ID, source_IP, destination_IP, &myTTL, mypayload);
+	decode_list->pack_id = PACKET_ID;
+	decode_list->SourceIP = source_IP;
+	decode_list->DestinationIP = destination_IP;
+	decode_list->TTL = myTTL;
+	decode_list->payload = mypayload;
+	//free(source_IP);
+	//free(destination_IP);
+	//free(mypayload);
 	return decode_list;
 }
 
@@ -177,7 +169,7 @@ struct ip_pack decode_packet(char* packets)
  * scan the string, and shift the binary bits to the
  * correct position.
  */
-unsigned int IPtoDec(char*IPdot) {
+uint32_t IPtoDec(char*IPdot) {
    int a,b,c,d;
    // Scan them to the int type
    sscanf(IPdot,"%d.%d.%d.%d",&a,&b,&c,&d);
@@ -186,7 +178,7 @@ unsigned int IPtoDec(char*IPdot) {
    unsigned int thisa = a<<24;
    unsigned int thisb = b<<16;
    unsigned int thisc = c<<8;
-   unsigned int sum = thisa+thisb+thisc+d;
+   uint32_t sum = thisa+thisb+thisc+d;
    ip = sum;
    return ip;
 }
@@ -200,11 +192,11 @@ unsigned int IPtoDec(char*IPdot) {
 int Ip_masking(char*ip,struct routing table)
 {
 	int cmpsize = table.prefix_length;
-	int dec_t_ip = IPtoDec(table.IP_addr);
-	int dec_p_ip = IPtoDec(ip);
+	uint32_t dec_t_ip = IPtoDec(table.IP_addr);
+	uint32_t dec_p_ip = IPtoDec(ip);
 	int shift = 31-cmpsize;
-	int t_cmp = dec_t_ip>>shift;
-	int p_cmp = dec_p_ip>>shift;
+	uint32_t t_cmp = dec_t_ip>>shift;
+	uint32_t p_cmp = dec_p_ip>>shift;
 	if (p_cmp == t_cmp)
 	{
 		return 1;
@@ -229,20 +221,20 @@ int Ip_masking(char*ip,struct routing table)
  * After we get those, just upgrade the counter, and store them to the stat structure.
  */
 
-struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct statistic stats)
+struct statistic Make_Decision(struct ip_pack *pack,struct routing* tables,struct statistic stats)
 {
 	int ri = 0;
-	if (decrement(pack.TTL) == 0)
+	if (decrement(pack->TTL) == 0)
 	{
 		printf("This is expired\n");
 		stats.Nexpired++;
 	}
 	else
 	{
-		while ((Ip_masking(pack.DestinationIP,tables[ri]) == 0) && ri < 3)
+		while ((Ip_masking(pack->DestinationIP,tables[ri]) == 0) && ri < 3)
 		{
 			ri++;
-			Ip_masking(pack.DestinationIP,tables[ri]);
+			Ip_masking(pack->DestinationIP,tables[ri]);
 		}
 		if (ri == 0)
 		{
@@ -250,7 +242,7 @@ struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct
 		}
 		else if(ri == 1)
 		{
-			printf("packet_ID = %d, dest = %s\n",pack.pack_id,pack.DestinationIP);
+			printf("packet_ID = %d, dest = %s\n",pack->pack_id,pack->DestinationIP);
 			stats.Ndelivered++;
 		}
 		else if (ri == 2)
@@ -260,7 +252,6 @@ struct statistic Make_Decision(struct ip_pack pack,struct routing* tables,struct
 		else if (ri == 3)
 		{
 			stats.Nunroutable++;
-			printf("\n\nyes\n\n");
 		}
 	}
 	return stats;
@@ -271,4 +262,15 @@ void sig_handler_2(int sig)
 {
 	stop_flag = 0;
 	exit(0);
+}
+
+void update_log(struct statistic stats,FILE *ofp)
+{
+	fseek(ofp,0,SEEK_SET);
+	fprintf(ofp,"expired packets: %d of packets expired\n",stats.Nexpired);
+	fprintf(ofp,"unroutable packets: %d of packets containing invalid detination\n",stats.Nunroutable);
+	fprintf(ofp,"delivered direct: %d of packets expired\n",stats.Ndelivered);
+	fprintf(ofp,"routerB: %d of packets forward to routerB\n",stats.NrouterB);
+	fprintf(ofp,"routerC: %d of packets forward to routerC\n\n",stats.NrouterC);
+	fflush(ofp);
 }

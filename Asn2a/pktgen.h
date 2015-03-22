@@ -5,6 +5,11 @@
 #include <signal.h>
 #include <setjmp.h>
 #include <unistd.h>
+#include <time.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 struct IP_packet
 {

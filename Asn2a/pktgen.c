@@ -1,16 +1,3 @@
-/* This client sends an integer value encoded as a string to an UDP server, and waits to receive the factorial of that number the Server  */
-
-#include <time.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <signal.h>
-#include <setjmp.h>
-#include <stdlib.h>
-#include <string.h>
 #include "pktgen.h"
 
 #define BUFLEN 512
@@ -22,6 +9,7 @@ static void usage()
 	fprintf(stderr,"usage: %s <ServerPORT> <outpath> \n",__progname);
 	exit(EXIT_FAILURE);
 }
+
 
 int main( int argc, char ** argv)
 {
@@ -71,7 +59,8 @@ int main( int argc, char ** argv)
 	int thisTTL;
 	int countAtoB,countAtoC,countBtoA,countBtoC,countCtoA,countCtoB,countInvalid;
 	countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
-    while (1)
+	(void) signal(SIGINT, sig_handler);
+    while (stop_flag)
 	{
 		
 	    char *package = malloc(sizeof(char*)*20);
@@ -80,7 +69,7 @@ int main( int argc, char ** argv)
 		Packet_ID++;
 		if (Packet_ID%2 == 0)
 		{
-			sleep(1);
+			sleep(2);
 		}
 		char buffer[32];
 		char* packet_ID = itoa(Packet_ID,buffer);
@@ -173,6 +162,7 @@ int main( int argc, char ** argv)
 		/* Print out the results in the network file */
 		if ((Packet_ID % 20) == 0)
 		{
+			fseek(ofp,0,SEEK_SET);
 			fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network2,countAtoB,network1,network2);
 			fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network3,countAtoC,network1,network3);
 			fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network2, network1,countBtoA,network2,network1);
@@ -180,11 +170,18 @@ int main( int argc, char ** argv)
 			fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
 			fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
 			fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
-			countAtoB=0;countAtoC=0;countBtoA=0;countBtoC=0;countCtoA=0;countCtoB=0;countInvalid=0;
 			fflush(ofp);
 		}
-		(void) signal(SIGINT, sig_handler);
 	}
+	fseek(ofp,0,SEEK_SET);
+	fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network2,countAtoB,network1,network2);
+	fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network1, network3,countAtoC,network1,network3);
+	fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network2, network1,countBtoA,network2,network1);
+	fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network2, network3,countBtoC,network2,network3);
+	fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network1,countCtoA,network3,network1);
+	fprintf(ofp, "%s to %s <%d of packets generated with source host in %s and destination host in %s>\n", network3, network2,countCtoB,network3,network2);
+	fprintf(ofp, "Invalid Destination: <%d of packets generated with invalid destination>\n\n",countInvalid);
+	fflush(ofp);
 	fclose(ofp);
 	close(s);
  	return 0;
@@ -244,5 +241,4 @@ char* itoa(int i, char b[]){
 void sig_handler(int sig)
 {
 	stop_flag = 0;
-	exit(1);
 }

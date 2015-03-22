@@ -21,4 +21,11 @@ How to run this?
 
 	6. After exit. make clean to clean the junk file and open the log files to check results.
 
+
+Problem:
+	I will lose 5 package when I was recieving the first 5 packges.
+	But for the other 20 packages after the first 5 package. It will not
+	lose. You can check it by deleting the fseek line and copy the intializing
+	counter line in the router.c
+
 Thanks!

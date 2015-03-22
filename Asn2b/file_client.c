@@ -13,10 +13,35 @@
 
 unsigned long ip_aton(const char *cp);
 
+static void usage()
+{
+	extern char * __progname;
+	fprintf(stderr,"usage: %s <ServerIP> <ServerPort> <RequestFileName>\n",__progname);
+	exit(EXIT_FAILURE);
+}
+
+
 int main(int argc, char **argv){
 	struct sockaddr_in si_client,si_server;
 	int s,slen=sizeof(si_server);
 
+	if ( argc != 4 )
+	{
+		usage();
+	}
+
+	if (argv[1] == '\0')
+	{
+		fprintf(stderr,"error: {%s} is not a valid IP!\n",argv[1]);
+		exit(EXIT_FAILURE);
+	}	
+
+	if (argv[2] == '\0')
+	{
+		fprintf(stderr,"error: {%s} is not a valid port!\n",argv[2]);
+		exit(EXIT_FAILURE);
+	}	
+	
 	if((s=socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP))==-1){
 		printf("Error in creating socket");
 		return 0;
@@ -47,29 +72,36 @@ int main(int argc, char **argv){
 
 	char chunk[CHUNKLEN];
 
-	struct timeval tv;
-	tv.tv_sec = 5;
-	tv.tv_usec = 0;
 	
-	setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
+	
+	
 
 	while(1){
-		
+		/* If waiting time > 5 seconds, just kill the waiting process */
+		struct timeval tv;
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;		
+		setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
+
 		if(recvfrom(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_server,(socklen_t *)&slen)!=-1){
 			setsockopt(s,SOL_SOCKET,SO_RCVTIMEO,(char*)&tv,sizeof(struct timeval));
 			
+			/* If file not found, just print not found */
 			if(strncmp(chunk,"404 Not Found!\n",19)==0){
 				printf("Server cannot find the file,exit the program.\n");
 				break;
 			}
+			
+			/* If success,print the chunk to the screen */
 			printf("%s",chunk);
+			continue;
 		}
+		printf("Time out!\n");
+		break;
 		
 	}
 	
-	close(s);
-	printf("File is here!\n");
-	
+	close(s);	
  	return 0;
  }
 

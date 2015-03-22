@@ -4,6 +4,7 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/uio.h>
+#include <sys/file.h>
 #include <netinet/in.h>
 
 #include <err.h>
@@ -28,7 +29,12 @@ char* get_time();
 
 static void kidhandler(int signum);
 
-
+static void usage()
+{
+	extern char * __progname;
+	fprintf(stderr,"usage: %s <ServerPORT> <RequestedFilePath> <LogFilePath>\n",__progname);
+	exit(EXIT_FAILURE);
+}
 
 int main(int argc,char** argv)
 {
@@ -39,12 +45,17 @@ int main(int argc,char** argv)
 	/* just exit with failure */
 	if ( argc != 4 )
 	{
-		printf("\n\nusage: %s <int value>\n\n", argv[0]);
-		exit(1);
+		usage();
 	}
 
 	/* The first argument is the port number */
 	int PORT = atoi(argv[1]);
+
+	if (argv[1] == '\0')
+	{
+		fprintf(stderr,"error: {%s} is not a valid port!\n",argv[1]);
+		exit(EXIT_FAILURE);
+	}
 	/* The second argument is the requesting file path */
 	char * filepath1;
 	filepath1 = argv[2];
@@ -54,7 +65,6 @@ int main(int argc,char** argv)
 	filepath2 = argv[3];
 	FILE *ofp;
 
-	
 
 	if ( ( s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP) ) == -1 )
 	{
@@ -68,8 +78,8 @@ int main(int argc,char** argv)
 	si_server.sin_addr.s_addr = htonl(INADDR_ANY); /* htonl(INADDR_ANY) for any interface on this machine */
 	
 
-    //if (daemon(1,0) == -1) 
-    //    printf("ERROR: daemon() failed!!!!!! \n");
+    if (daemon(1,0) == -1) 
+        printf("ERROR: daemon() failed!!!!!! \n");
 
 	if ( bind(s, (struct sockaddr *)&si_server, sizeof(si_server)) == -1 )
 	{
@@ -90,7 +100,7 @@ int main(int argc,char** argv)
 	/*
 	 * we want to allow system calls like accept to be restarted if they
 	 * get interrupted by a SIGCHLD
-	 */
+	 */ #include <sys/file.h>
     sa.sa_flags = SA_RESTART;
     if (sigaction(SIGCHLD, &sa, NULL) == -1){
         err(1, "sigaction failed");
@@ -141,7 +151,14 @@ int main(int argc,char** argv)
 				
 				ifp = fopen(input_filepath, "r");
 				ofp = fopen(output_filepath, "w");
+				if (ofp == NULL)
+				{
+					fprintf(stderr,"error: cannot open {%s} file!\n",argv[3]);
+					exit(EXIT_FAILURE);
+				}
 				int flag;
+
+				/* If we can't find the file, just send them file not found */
 				if(ifp==NULL)
 				{
 					fprintf(stderr,"File not found.\n");
@@ -154,6 +171,10 @@ int main(int argc,char** argv)
 				}
 
 				char chunk[CHUNKLEN];
+				/* sending the file by spliting them into 1kb chunk */
+				/* Implemented by fgetc to chunklen =1024 */
+				/* If chunklen = 1024, it should followed by the "$" */
+				/* Otherwise, just continue */
 				while(!feof(ifp)){
 					memset(chunk,0,CHUNKLEN+1);
 					int c;
@@ -174,6 +195,7 @@ int main(int argc,char** argv)
 							break;
 						}
 					}
+					/* If we can't send it */
 					if(sendto(s,chunk,sizeof(chunk)+1,0,(struct sockaddr*)&si_client,sizeof(si_client))<0){
 						printf("Transmission failed at this time, stop transmission.\n");
 						flag = 2;
@@ -182,6 +204,7 @@ int main(int argc,char** argv)
 					}
 				}
 				
+				/* If success, write all the message to the log */
 				tras_time = get_time();
 				printf("%s\n",tras_time);
 				flag = 0;	
@@ -201,6 +224,7 @@ int main(int argc,char** argv)
  	return 0;
  }
 
+/* Get the size of the file */
 int get_file_size(FILE*ifp)
 {
 	int counter = 0;
@@ -215,7 +239,7 @@ int get_file_size(FILE*ifp)
 	return counter;
 }
 
-
+/* Get time */
 char* get_time()
 {
 	char s[80];
@@ -228,8 +252,15 @@ char* get_time()
 	return strdup(s);
 }
 
+
+/* Write the server log
+ * If success, print transmission time
+ * If file not found, print 404
+ * If not completed, print not completed
+ */
 void writelog(char *clientIP,int clientPORT,char* Filename_sent,char *request_time,char *transmission_time,FILE *ofp,int flag)
 {
+	flock(fileno(ofp),LOCK_EX);
 	char* flag_notfound = "file not found!";
 	char* flag_notcompleted = "transmission not completed!";
 	if (flag == 0)
@@ -245,6 +276,7 @@ void writelog(char *clientIP,int clientPORT,char* Filename_sent,char *request_ti
 		fprintf(ofp,"%s %d %s %s %s\n\n",clientIP,clientPORT,Filename_sent,request_time, flag_notcompleted);
 	}
 	fflush(ofp);
+	flock(fileno(ofp),LOCK_UN);
 }
 
 static void kidhandler(int signum) {
