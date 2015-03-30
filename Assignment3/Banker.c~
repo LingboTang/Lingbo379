@@ -87,10 +87,6 @@ int[] request_generator()
 }
 */
 
-/*void snapshot()
-{
-	
-}
 
 void sig_handler(int sig)
 {
