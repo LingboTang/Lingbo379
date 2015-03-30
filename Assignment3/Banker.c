@@ -68,7 +68,6 @@ int main()
 		for (k=0;k<number_p;k++)
 		{
 			request_generator(number_r,k,process);
-			printf("\n");
 		}
 
 	}
@@ -81,14 +80,13 @@ int rdm_req(const int min, const int max)
 	return min + ( rand() % (max-min+1) );
 }
 
-void request_generator(int r,int which,int* proc[])
+void request_generator(int r,int which,int proc[which][r])
 {
 	int j;
 	int request[r];
 	for (j=0; j<r; j++)
 	{
 		request[r] = rdm_req(0,proc[which][j]);
-		printf("%d",request[r]);
 	}
 }
 
