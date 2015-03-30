@@ -1,0 +1,11 @@
+*********************************************
+## CMPUT379 Assignment3
+## Banker's Algorithm
+## Prof: Mohammad Bhuiyan
+## Student: LIngbo Tang
+*********************************************
+
+How to run this?
+	In terminal type: make
+	If you want to clean the junk file: make clean
+	Type in the 
