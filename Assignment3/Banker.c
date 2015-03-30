@@ -45,30 +45,17 @@ int main()
 		}
 	}
 
-	printf("\n");
-	for (i = 0;i<number_p;i++)
-	{
-		for (j=0;j<number_r;j++)
-		{
-			process[i][j]++;
-			printf("%d ",process[i][j]);
-		}
-		printf("\n");
-	}
-
 	(void) signal(SIGINT, sig_handler);
 	int counter = 0;
 	while (stop_flag)
 	{
-		if ((counter % 5) == 0)
+		if (((counter % 5) == 0) && (counter >0))
 		{
 			sleep(2);
 		}
-		int k;
-		for (k=0;k<number_p;k++)
-		{
-			request_generator(number_r,k,process);
-		}
+		int k = rdm_req(0,number_p);
+		request_generator(number_r,k,number_p,process);
+		counter++;
 
 	}
 	printf("\nSimulation has been ended.\n");
@@ -80,14 +67,17 @@ int rdm_req(const int min, const int max)
 	return min + ( rand() % (max-min+1) );
 }
 
-void request_generator(int r,int which,int proc[which][r])
+int* request_generator(int r,int which,int p,int proc[p][r])
 {
 	int j;
 	int request[r];
 	for (j=0; j<r; j++)
 	{
-		request[r] = rdm_req(0,proc[which][j]);
+		printf("%d ",proc[which][j]);
+		request[j] = rdm_req(0,proc[which][j]);
 	}
+	//printf("%d\n",request[1]);
+	return request[r];
 }
 
 

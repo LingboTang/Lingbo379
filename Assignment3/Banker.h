@@ -11,4 +11,4 @@
 int stop_flag = 1;
 void sig_handler(int sig);
 int rdm_req(const int min, const int max);
-void request_generator(int r,int which,int proc[which][r]);
+int* request_generator(int r,int which,int p,int proc[p][r]);
