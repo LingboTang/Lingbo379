@@ -41,6 +41,7 @@ int main()
 	allocation_generator(number_r,number_p,process,allocation);
 
 	int request[number_r];
+	int current_Avail[number_r];
 	(void) signal(SIGINT, sig_handler);
 	int counter = 0;
 	while (stop_flag)
@@ -52,6 +53,7 @@ int main()
 
 		int k = rand()%(number_p-0);
 		request_generator(number_r,k,number_p,process,allocation,request);
+		current_Avilable(number_p,number_r,Availres,allocation,current_Avail);
 	}
 	printf("\nSimulation has been ended.\n");
 	return 0;
@@ -67,36 +69,46 @@ int rdm_num(const int min, const int max)
 void allocation_generator(int r,int p,int proc[p][r],int allocation[p][r])
 {
 	int j;
-	printf("This allocation is: \n");
 	int i;
 	for (i=0;i<p;i++)
 	{
 		for (j = 0;j<r; j++)
 		{
 			allocation[i][j] = rdm_num(0,proc[i][j]);
-			printf("%d ",allocation[i][j]);
 		}
-		printf("\n");
 	}
 }
 
 void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r],int request[r])
 {
-	printf("\nWhich process:%d\n",which);
 	int j;
-	printf("This request is: \n");
 	for (j=0; j<r; j++)
 	{
 		request[j] = rdm_num(0,proc[which][j]-allocation[which][j]);
-		printf("%d ",request[j]);
 	}
 }
 
-/*void report()
+void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int current_Avail[r])
+{
+	int i,j;
+	int counter;
+	for (j=0;j<r;j++)
+	{
+		counter = 0;
+		for (i = 0; i<p; i++)
+		{
+			counter = counter+allocation[i][j];
+		}
+		current_Avail[j] = Availres[j]-counter;
+	}
+}
+
+/*void report(int p,int r,int Availres[r],int proc[p][r],int allocation[p][r],int request[r])
 {
 	printf("\n\t Current Allocation\t Current Request\t Currently Available Resouces\t
 		Maximum Possible Request\t Maximum Available Resources\n");
-	int i
+	int i,j;
+	
 }*/
 
 /*void snapshot()*/
