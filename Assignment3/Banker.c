@@ -38,6 +38,9 @@ int main()
 	}
 
 	int allocation[number_p][number_r];
+	allocation_generator(number_r,number_p,process,allocation);
+
+	int request[number_r];
 	(void) signal(SIGINT, sig_handler);
 	int counter = 0;
 	while (stop_flag)
@@ -46,13 +49,9 @@ int main()
 		{
 			sleep(2);
 		}
-		int k;
-		for (k=0;k<number_p;k++)
-		{
-			allocation_generator(number_r,number_p,process,allocation);
-			request_generator(number_r,k,number_p,process,allocation);
-			printf("\n");
-		}
+
+		int k = rand()%(number_p-0);
+		request_generator(number_r,k,number_p,process,allocation,request);
 	}
 	printf("\nSimulation has been ended.\n");
 	return 0;
@@ -77,13 +76,14 @@ void allocation_generator(int r,int p,int proc[p][r],int allocation[p][r])
 			allocation[i][j] = rdm_num(0,proc[i][j]);
 			printf("%d ",allocation[i][j]);
 		}
+		printf("\n");
 	}
 }
 
-void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r])
+void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r],int request[r])
 {
+	printf("\nWhich process:%d\n",which);
 	int j;
-	int request[r];
 	printf("This request is: \n");
 	for (j=0; j<r; j++)
 	{
@@ -91,6 +91,13 @@ void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r]
 		printf("%d ",request[j]);
 	}
 }
+
+/*void report()
+{
+	printf("\n\t Current Allocation\t Current Request\t Currently Available Resouces\t
+		Maximum Possible Request\t Maximum Available Resources\n");
+	int i
+}*/
 
 /*void snapshot()*/
 void sig_handler(int sig)
