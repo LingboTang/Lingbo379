@@ -45,6 +45,7 @@ int main()
 	int current_Need[number_p][number_r];
 	int finished[number_p];
 	int p_ind;
+	current_Avilable(number_p,number_r,Availres,allocation,current_Avail);
 	for (p_ind = 0; p_ind<number_p;p_ind++)
 	{
 		finished[p_ind] = 0;
@@ -53,18 +54,48 @@ int main()
 	int counter = 0;
 	while (stop_flag)
 	{
-		if ((counter % 5) == 0)
+		if (((counter % 5) == 0) && counter >0)
 		{
 			sleep(2);
 		}
-
 		int k = rand()%(number_p-0);
 		request_generator(number_r,k,number_p,process,allocation,request);
-		current_Avilable(number_p,number_r,Availres,allocation,current_Avail);
+		printf("Request: (");
+		for (j = 0; j<number_r; j++)
+		{
+			printf("%d ",request[j]);
+		}
+		printf(") from P%d\n", k+1);
 		curr_Need(number_r,number_p,process,allocation,current_Need);
-		int flag;
-		flag = check_granted(number_p,number_r, finished, Availres,current_Need);
-		printf("%d\n",flag);
+		for (i = 0; i < number_p; i++)
+		{
+			for (j=0;j<number_r;j++)
+			{
+				if (current_Need[i][j] <= Availres[j])
+				{
+					//continue;
+				}
+				else if (current_Need[i][j] > Availres[j])
+				{
+					printf("Request: (");
+					for (j = 0; j<number_r; j++)
+					{
+						printf("%d ",request[j]);
+					}
+					printf(") from P%d cannot be satisfied, P%d is in waiting state\n", k+1,k+1);
+				}
+			}
+			printf("Request: (");
+			for (j = 0; j<number_r; j++)
+			{
+				printf("%d ",request[j]);
+			}
+			printf(") from P%d has been granted\n", k+1);
+			finished[i] = 1;
+			printf("Current_Snapshot: ");
+			release(number_p, number_r,i,current_Avail,allocation);
+		}
+		counter++;
 	}
 	printf("\nSimulation has been ended.\n");
 	return 0;
@@ -127,47 +158,29 @@ void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int curre
 	}
 }
 
-int check_granted(int p,int r, int finished[p], int Availres[r],int Need[p][r])
+void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 {
-	int i,j;
-	int granted = 0;
-	for (i =0; i <p; i++)
+	int m = rand() % r;
+	int release;
+	release = rdm_num(0,allocation[which][m]-1);
+	allocation[which][m] = allocation[which][m] - release;
+	int j;
+	for (j=0; j<r; j++)
 	{
-		for(j = 0;j<r;j++)
+		if (j == m)
 		{
-			if (Need[p][r] > Availres[r])
-			{
-				continue;
-			}
-			else if (Need[p][r] <= Availres[r])
-			{
-				finished[p] = 1;
-				granted = 1;
-				break;
-			}
+			continue;
 		}
-		if (granted == 1)
+		else
 		{
-			break;
+			release = rdm_num(0,allocation[which][m]);
+			allocation[which][j] = allocation[which][j] - release;
+			current_Avail[j] = current_Avail[j] + release;
 		}
 	}
-	return granted;
 }
 
-/*
-void report(int p,int r,int Availres[r],int proc[p][r],int allocation[p][r],int request[r])
-{
-	printf("\n\t Current Allocation\t Current Request\t Currently Available Resouces\t
-		Maximum Possible Request\t Maximum Available Resources\n");
-	int i,j;
-	printf("P%d\t %d %d %d\t %d %d %d\t %d %d %d\t %d %d %d",1,allocation[1][1],
-		allocation[1][2],allocation[1])
-	
-}*/
 
-
-
-/*void snapshot()*/
 void sig_handler(int sig)
 {
 	stop_flag = 0;
