@@ -16,4 +16,4 @@ void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r]
 void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int current_Avail[r]);
 //void report(int p,int r,int Availres[r],int proc[p][r],int allocation[p][r],int request[r]);
 void curr_Need(int r, int p, int proc[p][r],int allocation[p][r],int Need[p][r]);
-void check_granted();
+int check_granted(int p,int r, int finished[p], int Availres[r],int Need[p][r]);

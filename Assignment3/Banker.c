@@ -43,6 +43,12 @@ int main()
 	int request[number_r];
 	int current_Avail[number_r];
 	int current_Need[number_p][number_r];
+	int finished[number_p];
+	int p_ind;
+	for (p_ind = 0; p_ind<number_p;p_ind++)
+	{
+		finished[p_ind] = 0;
+	}
 	(void) signal(SIGINT, sig_handler);
 	int counter = 0;
 	while (stop_flag)
@@ -56,6 +62,9 @@ int main()
 		request_generator(number_r,k,number_p,process,allocation,request);
 		current_Avilable(number_p,number_r,Availres,allocation,current_Avail);
 		curr_Need(number_r,number_p,process,allocation,current_Need);
+		int flag;
+		flag = check_granted(number_p,number_r, finished, Availres,current_Need);
+		printf("%d\n",flag);
 	}
 	printf("\nSimulation has been ended.\n");
 	return 0;
@@ -118,9 +127,31 @@ void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int curre
 	}
 }
 
-void check_granted()
+int check_granted(int p,int r, int finished[p], int Availres[r],int Need[p][r])
 {
-	
+	int i,j;
+	int granted = 0;
+	for (i =0; i <p; i++)
+	{
+		for(j = 0;j<r;j++)
+		{
+			if (Need[p][r] > Availres[r])
+			{
+				continue;
+			}
+			else if (Need[p][r] <= Availres[r])
+			{
+				finished[p] = 1;
+				granted = 1;
+				break;
+			}
+		}
+		if (granted == 1)
+		{
+			break;
+		}
+	}
+	return granted;
 }
 
 /*
