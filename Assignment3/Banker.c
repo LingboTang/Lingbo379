@@ -42,6 +42,7 @@ int main()
 
 	int request[number_r];
 	int current_Avail[number_r];
+	int current_Need[number_p][number_r];
 	(void) signal(SIGINT, sig_handler);
 	int counter = 0;
 	while (stop_flag)
@@ -54,6 +55,7 @@ int main()
 		int k = rand()%(number_p-0);
 		request_generator(number_r,k,number_p,process,allocation,request);
 		current_Avilable(number_p,number_r,Availres,allocation,current_Avail);
+		curr_Need(number_r,number_p,process,allocation,current_Need);
 	}
 	printf("\nSimulation has been ended.\n");
 	return 0;
@@ -88,6 +90,19 @@ void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r]
 	}
 }
 
+
+void curr_Need(int r, int p, int proc[p][r],int allocation[p][r],int Need[p][r])
+{
+	int i,j;
+	for (i = 0;i<p;i++)
+	{
+		for (j =0; j < r; j++)
+		{
+			Need[i][j] = proc[i][j]-allocation[i][j];
+		}
+	}
+}
+
 void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int current_Avail[r])
 {
 	int i,j;
@@ -103,13 +118,23 @@ void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int curre
 	}
 }
 
-/*void report(int p,int r,int Availres[r],int proc[p][r],int allocation[p][r],int request[r])
+void check_granted()
+{
+	
+}
+
+/*
+void report(int p,int r,int Availres[r],int proc[p][r],int allocation[p][r],int request[r])
 {
 	printf("\n\t Current Allocation\t Current Request\t Currently Available Resouces\t
 		Maximum Possible Request\t Maximum Available Resources\n");
 	int i,j;
+	printf("P%d\t %d %d %d\t %d %d %d\t %d %d %d\t %d %d %d",1,allocation[1][1],
+		allocation[1][2],allocation[1])
 	
 }*/
+
+
 
 /*void snapshot()*/
 void sig_handler(int sig)
