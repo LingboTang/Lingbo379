@@ -94,10 +94,22 @@ int main()
 			finished[i] = 1;
 			printf("Current_Snapshot: ");
 			release(number_p, number_r,i,current_Avail,allocation);
+			for (i = 0; i< number_p;i++)
+			{
+				for (j=0; j<number_r;j++)
+				{
+					printf("%d ",allocation[i][j]);
+				}
+				printf("\n");
+			}
+			for (j=0;j<number_r;j++)
+			{
+				printf("%d ",current_Avail[j]);
+			}
 		}
 		counter++;
 	}
-	printf("\nSimulation has been ended.\n");
+	printf("\n\nSimulation has been ended.\n\n");
 	return 0;
 }
 
@@ -160,10 +172,14 @@ void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int curre
 
 void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 {
-	int m = rand() % r;
+	int m;
+	m = rdm_num(0,r);
 	int release;
-	release = rdm_num(0,allocation[which][m]-1);
+	printf("pre\n");
+	release = rand()%(allocation[which][m]-1);
+	printf("post: %d\n", release);
 	allocation[which][m] = allocation[which][m] - release;
+	current_Avail[m] = current_Avail[m] + release;
 	int j;
 	for (j=0; j<r; j++)
 	{
@@ -173,7 +189,7 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 		}
 		else
 		{
-			release = rdm_num(0,allocation[which][m]);
+			release = rdm_num(0,allocation[which][j]);
 			allocation[which][j] = allocation[which][j] - release;
 			current_Avail[j] = current_Avail[j] + release;
 		}
