@@ -101,6 +101,7 @@ int main()
 	{
 		if (((counter % 5) == 0) && counter >0)
 		{
+			printf("Timestep %d\n",counter/5);
 			sleep(2);
 		}
 		curr_Need(number_r,number_p,processes,allocation,current_Need);
@@ -112,23 +113,25 @@ int main()
 			printf("\n");
 			fprintf(stderr,"error: Allocation Overflow!\n");
 			exit(EXIT_FAILURE);
-		} else {
-			printf("\nThis Passed!\n");
 		}
 		
 		/* Request-Release algorithm */
 		int k = rand()%(number_p-0);
 		request_generator(number_r,k,number_p,processes,allocation,request);
+		for (j = 0; j<number_r;j++)
+		{
+			request_Table[k][j] = request_Table[k][j]+request[j];
+		}
 		printf("Request: (");
 		for (j = 0; j<number_r; j++)
 		{
 			printf("%d ",request[j]);
 		}
 		printf(") from P%d\n", k+1);
-		
+		print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 		for (i = 0; i < number_p; i++)
 		{
-			
+			release(number_p, number_r,i,current_Avail,allocation,request_Table);
 		}
 		counter++;
 	}
@@ -138,9 +141,16 @@ int main()
 
 
 /* Random number generator */
-int rdm_num(const int min, const int max)
+int rdm_num(int min, int max)
 {
-	return min + ( rand() % (max-min+1) );
+	if (max <= 0)
+	{
+		return 0;
+	}
+	else 
+	{
+		return min+(rand()%(max-min+1));
+	}
 }
 
 
@@ -222,26 +232,29 @@ void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int curre
  * available = availabe + release.
  ******************************************/
 
-void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
+void release(int p, int r,int which,int current_Avail[r],int allocation[p][r],int request_Table[p][r])
 {
 	int m;
-	m = rdm_num(0,r);
+	m = rand()%r;
 	int release;
-	release = rand()%(allocation[which][m]-1);
-	allocation[which][m] = allocation[which][m] - release;
-	current_Avail[m] = current_Avail[m] + release;
 	int j;
 	for (j=0; j<r; j++)
 	{
 		if (j == m)
 		{
-			continue;
-		}
-		else
-		{
-			release = rdm_num(0,allocation[which][j]);
+			release = rdm_num(0,allocation[which][j])-1;
 			allocation[which][j] = allocation[which][j] - release;
 			current_Avail[j] = current_Avail[j] + release;
+			allocation[which][j] = allocation[which][j]+request_Table[which][j];
+			request_Table[which][j] = request_Table[which][j]-request_Table[which][j];
+		}
+		else 
+		{
+			release = rdm_num(0,allocation[which][j]); 
+			allocation[which][j] = allocation[which][j] - release;
+			current_Avail[j] = current_Avail[j] + release;
+			allocation[which][j] = allocation[which][j]+request_Table[which][j];
+			request_Table[which][j] = request_Table[which][j]-request_Table[which][j];
 		}
 	}
 }
@@ -292,12 +305,10 @@ int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int N
                 }
             }
         }
-		printf("In the loop: %d\n",checked);
         if (!safety) {
 			break;
         }
     }
-	printf("checked: %d\n",checked);
 	if (checked == 0)
 	{
 		safety = 1;
@@ -308,6 +319,88 @@ int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int N
 		safety = 0;
 		return safety;
 	}
+}
+
+/************************************************
+ * Snapshot
+ ************************************************/
+void print_snapshot(int p,int r,int allocation[p][r],int request[p][r],int Avail[r],int proc[p][r],int Max[r])
+{
+	int i,j;
+	printf("Current snapshot: \n\n");
+	printf("Current Allocation\n");
+	printf("____________________________________\n");
+	for (j=0;j<r;j++)
+	{
+		printf("R%d ",j);
+	}
+	printf("\n");
+	for (i = 0;i<p;i++)
+	{
+		printf("P%d ",i);
+		for (j =0; j<r;j++)
+		{
+			printf("%d ",allocation[i][j]);
+		}
+		printf("\n");
+	}
+	printf("Current Request\n");
+	printf("____________________________________\n");
+	for (j=0;j<r;j++)
+	{
+		printf("R%d ",j);
+	}
+	printf("\n");
+	for (i = 0;i<p;i++)
+	{
+		printf("P%d ",i);
+		for (j =0; j<r;j++)
+		{
+			printf("%d ",request[i][j]);
+		}
+		printf("\n");
+	}
+	printf("Currently Available Resource\n");
+	printf("____________________________________\n");
+	for (j=0;j<r;j++)
+	{
+		printf("R%d ",j);
+	}
+	printf("\n");
+	for (j =0; j<r;j++)
+	{
+		printf("%d ",Avail[j]);
+	}
+	printf("\n");
+
+	printf("Maximum Possible Request\n");
+	printf("____________________________________\n");
+	for (j=0;j<r;j++)
+	{
+		printf("R%d ",j);
+	}
+	printf("\n");
+	for (i = 0;i<p;i++)
+	{
+		printf("P%d ",i);
+		for (j =0; j<r;j++)
+		{
+			printf("%d ",proc[i][j]);
+		}
+		printf("\n");
+	}
+	printf("Maximum Available Resources\n");
+	printf("____________________________________\n");
+	for (j=0;j<r;j++)
+	{
+		printf("R%d ",j);
+	}
+	printf("\n");
+	for (j =0; j<r;j++)
+	{
+		printf("%d ",Max[j]);
+	}
+	printf("\n");
 }
 
 
