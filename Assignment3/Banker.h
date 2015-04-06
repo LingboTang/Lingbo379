@@ -16,3 +16,4 @@ void request_generator(int r,int which,int p,int proc[p][r],int allocation[p][r]
 void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int current_Avail[r]);
 void curr_Need(int r, int p, int proc[p][r],int allocation[p][r],int Need[p][r]);
 void release(int p, int r,int which,int current_Avail[r],int allocation[p][r]);
+int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int Need[p][r],int finish[p]);

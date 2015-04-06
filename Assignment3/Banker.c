@@ -27,19 +27,20 @@ int main()
 	/* Number of different max Res that different Process will request
 	* eg. P1 2 2 1
 	*/
-	int process[number_p][number_r];
-	printf("\nDetail of process max table:\n");
+	int processes[number_p][number_r];
 	for (i = 0;i<number_p;i++)
 	{
-		for (j=0;j<number_r;j++)
+		printf("Detail of process P%d: ",i+1);
+		for (j = 0; j< number_r; j++)
 		{
-			scanf("%d",&process[i][j]);
+			scanf("%d",&processes[i][j]);
 		}
+		printf("\n");
 	}
 
 	/* Generate the current allocation */
 	int allocation[number_p][number_r];
-	allocation_generator(number_r,number_p,process,allocation);
+	allocation_generator(number_r,number_p,processes,allocation);
 
 	/* Initialize the current request */
 	int request[number_r];
@@ -102,15 +103,27 @@ int main()
 		{
 			sleep(2);
 		}
+		curr_Need(number_r,number_p,processes,allocation,current_Need);
+		/* Safety algorithm */
+		if (safety_Checker(number_p, number_r,allocation,current_Avail,current_Need,finished) == 0)
+		{
+			printf("\n");
+			fprintf(stderr,"error: Allocation Overflow!\n");
+			exit(EXIT_FAILURE);
+		} else {
+			printf("\nPassed!\n");
+		}
+		
+		/* Request-Release algorithm */
 		int k = rand()%(number_p-0);
-		request_generator(number_r,k,number_p,process,allocation,request);
+		request_generator(number_r,k,number_p,processes,allocation,request);
 		printf("Request: (");
 		for (j = 0; j<number_r; j++)
 		{
 			printf("%d ",request[j]);
 		}
 		printf(") from P%d\n", k+1);
-		curr_Need(number_r,number_p,process,allocation,current_Need);
+		
 		for (i = 0; i < number_p; i++)
 		{
 			
@@ -230,6 +243,60 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 		}
 	}
 }
+
+/*********************************************
+ * Safety Algorithm Checker
+ * First we run the safety algorithm to check
+ * if the whole system is safe or not.
+ * If there exist one allocation which
+ * allocation[i] > work[i], then just break
+ * and display the system is not safe.
+ *********************************************/
+
+int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int Need[p][r],int finish[p])
+{
+	int i,j;
+	int avail_checker[r];
+	int safety =0;
+	int checked = r;
+	int executed = 1;
+	int running[p];
+	for (i = 0; i < p; i++) {
+        running[i] = 1;
+    }
+	for (j=0;j<r;j++)
+	{
+		avail_checker[j] = current_Avail[j];
+	}
+	while (checked != 0) {
+        safety = 0;
+        for (i = 0; i < p; i++) {
+            if (running[i]) {
+                executed = 1;
+                for (j = 0; j < r; j++) {
+                    if (Need[i][j] > avail_checker[j]) {
+                        executed = 0;
+                        break;
+                    }
+                }
+                if (executed) {
+                    running[i] = 0;
+                    checked--;
+                    safety = 1;
+                    for (j = 0; j < r; j++) {
+                        avail_checker[j] += allocation[i][j];
+                    }
+                    break;
+                }
+            }
+        }
+        if (!safety) {
+            break;
+        }
+    }
+	return safety;
+}
+
 
 /************************************
  * Keyboard signal (Ctrl+C) handler
