@@ -105,13 +105,15 @@ int main()
 		}
 		curr_Need(number_r,number_p,processes,allocation,current_Need);
 		/* Safety algorithm */
-		if (safety_Checker(number_p, number_r,allocation,current_Avail,current_Need,finished) == 0)
+
+			
+		if (safety_Checker(number_p, number_r, allocation,current_Avail,current_Need,finished)==0)
 		{
 			printf("\n");
 			fprintf(stderr,"error: Allocation Overflow!\n");
 			exit(EXIT_FAILURE);
 		} else {
-			printf("\nPassed!\n");
+			printf("\nThis Passed!\n");
 		}
 		
 		/* Request-Release algorithm */
@@ -258,18 +260,18 @@ int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int N
 	int i,j;
 	int avail_checker[r];
 	int safety =0;
-	int checked = r;
+	int checked = p;
 	int executed = 1;
 	int running[p];
-	for (i = 0; i < p; i++) {
-        running[i] = 1;
-    }
-	for (j=0;j<r;j++)
+	for(j = 0;j<r;j++)
 	{
 		avail_checker[j] = current_Avail[j];
 	}
+	for (i = 0; i < p; i++) {
+        running[i] = 1;
+    }
 	while (checked != 0) {
-        safety = 0;
+       	safety = 0;
         for (i = 0; i < p; i++) {
             if (running[i]) {
                 executed = 1;
@@ -290,11 +292,22 @@ int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int N
                 }
             }
         }
+		printf("In the loop: %d\n",checked);
         if (!safety) {
-            break;
+			break;
         }
     }
-	return safety;
+	printf("checked: %d\n",checked);
+	if (checked == 0)
+	{
+		safety = 1;
+		return safety;
+	}
+	else
+	{
+		safety = 0;
+		return safety;
+	}
 }
 
 
