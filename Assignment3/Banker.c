@@ -99,9 +99,9 @@ int main()
      *******************************************/
 	while (stop_flag)
 	{
-		if (((counter % 5) == 0) && counter >0)
+		if ((counter % 5) == 0)
 		{
-			printf("\nTimestep %d\n",counter/5);
+			printf("\nTimestep %d\n",counter/5+1);
 			sleep(2);
 		}
 		curr_Need(number_r,number_p,processes,allocation,current_Need);
@@ -230,6 +230,8 @@ void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int curre
  * one instance in the process. And
  * allocation = allocation -release.
  * available = availabe + release.
+ * request_Table - request.
+ * available - request
  ******************************************/
 
 void release(int p, int r,int which,int current_Avail[r],int allocation[p][r],int request_Table[p][r])
@@ -246,7 +248,9 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r],in
 			allocation[which][j] = allocation[which][j] - release;
 			current_Avail[j] = current_Avail[j] + release;
 			allocation[which][j] = allocation[which][j]+request_Table[which][j];
+			current_Avail[j] = current_Avail[j]-request_Table[which][j];
 			request_Table[which][j] = request_Table[which][j]-request_Table[which][j];
+			
 		}
 		else 
 		{
@@ -254,6 +258,7 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r],in
 			allocation[which][j] = allocation[which][j] - release;
 			current_Avail[j] = current_Avail[j] + release;
 			allocation[which][j] = allocation[which][j]+request_Table[which][j];
+			current_Avail[j] = current_Avail[j]-request_Table[which][j];
 			request_Table[which][j] = request_Table[which][j]-request_Table[which][j];
 		}
 	}
