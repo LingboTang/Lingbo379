@@ -131,7 +131,37 @@ int main()
 		print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 		for (i = 0; i < number_p; i++)
 		{
-			release(number_p, number_r,i,current_Avail,allocation,request_Table);
+			if (veccmp(number_r,request_Table[i],current_Need[i]) == 0)
+			{
+				printf("\n");
+				fprintf(stderr,"error: Allocation Overflow!\n");
+				exit(EXIT_FAILURE);
+			}
+			else
+			{
+				if (veccmp(number_r,request_Table[i],current_Avail) == 0)
+				{
+					finished[i] = 1;
+				}
+				else if ((veccmp(number_r,request_Table[i],current_Avail) == 1) && (finished[i] == 0))
+				{
+					printf("Request: (");
+					for (j = 0; j<number_r; j++)
+					{
+						printf("%d ",request[j]);
+					}
+					printf(") from P%d has been granted\n", k+1);
+					print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
+					release(number_p, number_r,i,current_Avail,allocation,request_Table);
+					/*printf("Request: (");
+					for (j = 0; j<number_r; j++)
+					{
+						printf("%d ",request[j]);
+					}
+					printf(") from P%d has been granted\n", k+1);*/
+					print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
+				}
+			}
 		}
 		counter++;
 	}
@@ -411,6 +441,28 @@ void print_snapshot(int p,int r,int allocation[p][r],int request[p][r],int Avail
 	printf("\n");
 }
 
+
+/*******************************************
+ * Vector Compare
+ *******************************************/
+int veccmp(int r,int v1[r],int v2[r])
+{
+	int flag;
+	int j;
+	for (j = 0;j<r;j++)
+	{
+		if (v1[j] > v2[j])
+		{
+			flag = 0;
+			break;
+		}
+		else
+		{
+			flag = 1;
+		}
+	}
+	return flag;
+}
 
 /************************************
  * Keyboard signal (Ctrl+C) handler
