@@ -66,7 +66,7 @@ int main()
 
 	/* Initialize the current available with value */
 	int p_ind;
-	current_Avilable(number_p,number_r,Availres,allocation,current_Avail);
+	current_Available(number_p,number_r,Availres,allocation,current_Avail);
 	for (p_ind = 0; p_ind<number_p;p_ind++)
 	{
 		locking[p_ind] = 0;
@@ -159,7 +159,7 @@ int main()
 					{
 						printf("%d ",request[j]);
 					}
-					printf(") from P%d has been granted\n", k+1);
+					printf(") from P%d has been granted\n", i+1);
 					print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 					for (j = 0; j<number_r;j++)
 					{
@@ -185,14 +185,34 @@ int main()
 					{
 						current_cmp[j] = request_Table[i][j];
 					}
-					for (j=0;j<number_r;j++)
+					if (veccmp(number_r,current_cmp,current_Avail) == 1)
 					{
-						if (veccmp(number_r,current_cmp,current_Avail) == 1)
+						printf("Previous request of (");
+						for (j=0;j<number_r;j++)
 						{
-							
+							printf("%d ",request_Table[i][j]);
 						}
+						printf("from P%d has been satisfied.\n",i+1);
+						for (j = 0; j<number_r;j++)
+						{
+							current_Avail[j]=current_Avail[j]-current_cmp[j];
+						}
+						for (j = 0; j<number_r;j++)
+						{
+							request_Table[i][j] = request_Table[i][j]-current_cmp[j];
+						}
+						for (j = 0; j<number_r;j++)
+						{
+							allocation[i][j] = allocation[i][j]+current_cmp[j];
+						}
+						locking[i] = 0;
+					}
+					else
+					{
+						locking[i] = 1;
 					}
 				}
+				print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 			}
 		}
 		counter++;
@@ -271,7 +291,7 @@ void curr_Need(int r, int p, int proc[p][r],int allocation[p][r],int Need[p][r])
  * Available[i] = SysMax[i] - Allocation[i]
  ******************************************/
 
-void current_Avilable(int p,int r,int Availres[r],int allocation[p][r],int current_Avail[r])
+void current_Available(int p,int r,int Availres[r],int allocation[p][r],int current_Avail[r])
 {
 	int i,j;
 	int counter;
@@ -326,7 +346,7 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 		}
 		release_vec[j] = release;
 	}
-	printf("P%d has released (",which);
+	printf("P%d has released (",which+1);
 	for(j = 0;j<r;j++)
 	{
 		printf("%d ",release_vec[j]);
