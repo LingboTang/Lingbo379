@@ -149,7 +149,7 @@ int main()
 					{
 						printf("%d ",request[j]);
 					}
-					printf(") from P%d can not be satisfied, P%d is in waiting state.\n", k+1,k+1);
+					printf(") from P%d can not be satisfied, P%d is in waiting state.\n", i+1,i+1);
 					locking[i] = 1;
 				}
 				else if (veccmp(number_r,current_cmp,current_Avail) == 1)
@@ -157,7 +157,7 @@ int main()
 					printf("Request: (");
 					for (j = 0; j<number_r; j++)
 					{
-						printf("%d ",request[j]);
+						printf("%d ",request_Table[i][j]);
 					}
 					printf(") from P%d has been granted\n", i+1);
 					print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
@@ -469,7 +469,7 @@ void print_snapshot(int p,int r,int allocation[p][r],int request[p][r],int Avail
 		printf("\t%d ",Avail[j]);
 	}
 	printf("\n");
-	printf("\n\n");
+	/*printf("\n\n");
 	printf("Maximum Possible Request\n");
 	printf("____________________________________\n");
 	for (j=0;j<r;j++)
@@ -497,7 +497,7 @@ void print_snapshot(int p,int r,int allocation[p][r],int request[p][r],int Avail
 	for (j =0; j<r;j++)
 	{
 		printf("\t%d ",Max[j]);
-	}
+	}*/
 	printf("\n");
 }
 
