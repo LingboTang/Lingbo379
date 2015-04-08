@@ -116,13 +116,15 @@ int main()
 			printf("\nTimestep %d\n",counter/5+1);
 			sleep(2);
 		}
-		/* Safety algorithm */
 
 		
 		/* Request-Release algorithm */
 
 		int k = rdm_num(0,number_p-1);
-		if (check_allLock(number_p,locking) == 1)
+		curr_Need(number_r,number_p,processes,allocation,current_Need);
+		/* Safety algorithm */
+
+		if (safety_Checker(number_p, number_r, allocation,current_Avail,current_Need)==0)
 		{
 			release(number_p, number_r,k,current_Avail,allocation);
 			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
@@ -385,28 +387,6 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 		printf("%d ",release_vec[j]);
 	}
 	printf(") resources.\n");
-}
-
-/********************************************
- * Check All Lock
- ********************************************/
-int check_allLock(int p,int lock[p])
-{
-	int i;
-	int flag=0;
-	for (i = 0;i<p;i++)
-	{
-		if (lock[p] == 0)
-		{
-			flag = 0;
-			break;
-		}
-		else
-		{
-			flag = 1;
-		}
-	}
-	return flag;
 }
 
 
