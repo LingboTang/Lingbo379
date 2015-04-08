@@ -29,3 +29,5 @@ int safety_Checker(int p, int r, int allocation[p][r],int current_Avail[r],int N
 void print_snapshot(int p,int r,int allocation[p][r],int request[p][r],int Avail[r],int proc[p][r],int Max[r]);
 
 int veccmp(int r,int v1[r],int v2[r]);
+
+int check_allLock(int p,int lock[p]);

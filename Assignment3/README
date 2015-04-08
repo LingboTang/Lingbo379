@@ -21,5 +21,13 @@ How to run this?
 													 P2:0 1 1
 													 P3:0 0 1
 
-Snapshot:
-	It' hard to print them out, therefore, I split the big table into different small tables.
+***********************Note***************************
+
+1. I'll check the initial state using safety algorithm.
+   If the safety is not satisfied,I'll quit the program
+   by print the error message: Allocation Overflow.
+
+2. I'll check if every process is in waiting states, if
+   yes, I'll just let one of them release all their allocations.
+
+

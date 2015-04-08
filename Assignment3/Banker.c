@@ -73,6 +73,17 @@ int main()
 		locking[p_ind] = 0;
 	}
 
+
+	curr_Need(number_r,number_p,processes,allocation,current_Need);
+	/* Safety algorithm */
+
+	if (safety_Checker(number_p, number_r, allocation,current_Avail,current_Need)==0)
+	{
+		printf("\n");
+		print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
+		fprintf(stderr,"error: Allocation Overflow!\n");
+		exit(EXIT_FAILURE);
+	}
 	/* Termination signal */
 	(void) signal(SIGINT, sig_handler);
 
@@ -105,19 +116,52 @@ int main()
 			printf("\nTimestep %d\n",counter/5+1);
 			sleep(2);
 		}
-		curr_Need(number_r,number_p,processes,allocation,current_Need);
 		/* Safety algorithm */
 
-		if (safety_Checker(number_p, number_r, allocation,current_Avail,current_Need)==0)
-		{
-			printf("\n");
-			fprintf(stderr,"error: Allocation Overflow!\n");
-			exit(EXIT_FAILURE);
-		}
 		
 		/* Request-Release algorithm */
 
 		int k = rdm_num(0,number_p-1);
+		if (check_allLock(number_p,locking) == 1)
+		{
+			release(number_p, number_r,k,current_Avail,allocation);
+			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
+			int current_cmp[number_r];
+			for(i=0;i<number_p;i++)
+			{	
+				for (j = 0; j <number_r; j++)
+				{
+					current_cmp[j] = request_Table[i][j];
+				}
+				if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 1))
+				{
+					printf("Previous request of (");
+					for (j=0;j<number_r;j++)
+					{
+						printf("%d ",request_Table[i][j]);
+					}
+					printf(") from P%d has been satisfied.\n",i+1);
+					for (j = 0; j<number_r;j++)
+					{
+						current_Avail[j]=current_Avail[j]-current_cmp[j];
+					}
+					for (j = 0; j<number_r;j++)
+					{
+						request_Table[i][j] = request_Table[i][j]-current_cmp[j];
+					}
+					for (j = 0; j<number_r;j++)
+					{
+						allocation[i][j] = allocation[i][j]+current_cmp[j];
+					}
+					locking[i] = 0;
+				}
+				else if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 0))
+				{
+					locking[i] = 0;
+				}
+			}
+			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
+		}
 		while (locking[k] == 1)
 		{
 			k = rdm_num(0,number_p-1);
@@ -127,7 +171,7 @@ int main()
 		{
 			request_Table[k][j] = request_Table[k][j]+request[j];
 		}
-		printf("Request: (");
+		printf("Request: ( ");
 		for (j = 0; j<number_r; j++)
 		{
 			printf("%d ",request[j]);
@@ -141,7 +185,7 @@ int main()
 
 		if (veccmp(number_r,current_cmp,current_Avail) == 0)
 		{
-			printf("Request: (");
+			printf("Request: ( ");
 			for (j = 0; j<number_r; j++)
 			{
 				printf("%d ",request[j]);
@@ -151,7 +195,7 @@ int main()
 		}
 		else if (veccmp(number_r,current_cmp,current_Avail) == 1)
 		{
-			printf("Request: (");
+			printf("Request: ( ");
 			for (j = 0; j<number_r; j++)
 			{
 				printf("%d ",request_Table[k][j]);
@@ -170,43 +214,47 @@ int main()
 			{
 				allocation[k][j] = allocation[k][j]+current_cmp[j];
 			}
+			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 		}
-		release(number_p, number_r,k,current_Avail,allocation);
-	
-		for(i=0;i<number_p;i++)
-		{	
-			for (j = 0; j <number_r; j++)
-			{
-				current_cmp[j] = request_Table[i][j];
+		if (locking[k] == 0)
+		{
+			release(number_p, number_r,k,current_Avail,allocation);
+			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
+			for(i=0;i<number_p;i++)
+			{	
+				for (j = 0; j <number_r; j++)
+				{
+					current_cmp[j] = request_Table[i][j];
+				}
+				if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 1))
+				{
+					printf("Previous request of ( ");
+					for (j=0;j<number_r;j++)
+					{
+						printf("%d ",request_Table[i][j]);
+					}
+					printf(") from P%d has been satisfied.\n",i+1);
+					for (j = 0; j<number_r;j++)
+					{
+						current_Avail[j]=current_Avail[j]-current_cmp[j];
+					}
+					for (j = 0; j<number_r;j++)
+					{
+						request_Table[i][j] = request_Table[i][j]-current_cmp[j];
+					}
+					for (j = 0; j<number_r;j++)
+					{
+						allocation[i][j] = allocation[i][j]+current_cmp[j];
+					}
+					locking[i] = 0;
+				}
+				else if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 0))
+				{
+					locking[i] = 0;
+				}
 			}
-			if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 1))
-			{
-				printf("Previous request of (");
-				for (j=0;j<number_r;j++)
-				{
-					printf("%d ",request_Table[i][j]);
-				}
-				printf(") from P%d has been satisfied.\n",i+1);
-				for (j = 0; j<number_r;j++)
-				{
-					current_Avail[j]=current_Avail[j]-current_cmp[j];
-				}
-				for (j = 0; j<number_r;j++)
-				{
-					request_Table[i][j] = request_Table[i][j]-current_cmp[j];
-				}
-				for (j = 0; j<number_r;j++)
-				{
-					allocation[i][j] = allocation[i][j]+current_cmp[j];
-				}
-				locking[i] = 0;
-			}
-			else if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 0))
-			{
-				locking[i] = 0;
-			}
+			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 		}
-		print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
 		counter++;
 	}
 	printf("\n\nSimulation has been ended.\n\n");
@@ -331,13 +379,37 @@ void release(int p, int r,int which,int current_Avail[r],int allocation[p][r])
 		}
 		release_vec[j] = release;
 	}
-	printf("P%d has released (",which+1);
+	printf("P%d has released ( ",which+1);
 	for(j = 0;j<r;j++)
 	{
 		printf("%d ",release_vec[j]);
 	}
 	printf(") resources.\n");
 }
+
+/********************************************
+ * Check All Lock
+ ********************************************/
+int check_allLock(int p,int lock[p])
+{
+	int i;
+	int flag=0;
+	for (i = 0;i<p;i++)
+	{
+		if (lock[p] == 0)
+		{
+			flag = 0;
+			break;
+		}
+		else
+		{
+			flag = 1;
+		}
+	}
+	return flag;
+}
+
+
 
 /*********************************************
  * Safety Algorithm Checker
