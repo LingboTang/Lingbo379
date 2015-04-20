@@ -408,3 +408,5 @@ DiningPhilosophers.putdown(2);
 DiningPhilosophers.pickup(5);
 eat
 DiningPhilosophers.putdown(5);
+
+// end
