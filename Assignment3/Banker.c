@@ -74,16 +74,6 @@ int main()
 	}
 
 
-	curr_Need(number_r,number_p,processes,allocation,current_Need);
-	/* Safety algorithm */
-
-	if (safety_Checker(number_p, number_r, allocation,current_Avail,current_Need)==0)
-	{
-		printf("\n");
-		print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
-		fprintf(stderr,"error: Allocation Overflow!\n");
-		exit(EXIT_FAILURE);
-	}
 	/* Termination signal */
 	(void) signal(SIGINT, sig_handler);
 
@@ -124,46 +114,6 @@ int main()
 		curr_Need(number_r,number_p,processes,allocation,current_Need);
 		/* Safety algorithm */
 
-		if (safety_Checker(number_p, number_r, allocation,current_Avail,current_Need)==0)
-		{
-			release(number_p, number_r,k,current_Avail,allocation);
-			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
-			int current_cmp[number_r];
-			for(i=0;i<number_p;i++)
-			{	
-				for (j = 0; j <number_r; j++)
-				{
-					current_cmp[j] = request_Table[i][j];
-				}
-				if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 1))
-				{
-					printf("Previous request of (");
-					for (j=0;j<number_r;j++)
-					{
-						printf("%d ",request_Table[i][j]);
-					}
-					printf(") from P%d has been satisfied.\n",i+1);
-					for (j = 0; j<number_r;j++)
-					{
-						current_Avail[j]=current_Avail[j]-current_cmp[j];
-					}
-					for (j = 0; j<number_r;j++)
-					{
-						request_Table[i][j] = request_Table[i][j]-current_cmp[j];
-					}
-					for (j = 0; j<number_r;j++)
-					{
-						allocation[i][j] = allocation[i][j]+current_cmp[j];
-					}
-					locking[i] = 0;
-				}
-				else if ((veccmp(number_r,current_cmp,current_Avail) == 1)&&(locking[i] == 0))
-				{
-					locking[i] = 0;
-				}
-			}
-			print_snapshot(number_p,number_r,allocation,request_Table,current_Avail,processes,Availres);
-		}
 		while (locking[k] == 1)
 		{
 			k = rdm_num(0,number_p-1);
@@ -292,7 +242,7 @@ void allocation_generator(int r,int p,int proc[p][r],int allocation[p][r])
 	{
 		for (j = 0;j<r; j++)
 		{
-			allocation[i][j] = rdm_num(0,proc[i][j]);
+			allocation[i][j] = 0;
 		}
 	}
 }
