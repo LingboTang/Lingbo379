@@ -104,7 +104,7 @@ int main()
 		if ((counter % 5) == 0)
 		{
 			printf("\nTimestep %d\n",counter/5+1);
-			sleep(1);
+			sleep(2);
 		}
 
 		

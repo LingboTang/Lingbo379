@@ -1,0 +1,34 @@
+*********************************************
+## CMPUT379 Assignment3
+## Banker's Algorithm
+## Prof: Mohammad Bhuiyan
+## Student: LIngbo Tang
+*********************************************
+
+How to run this?
+	1. In terminal type: make.
+	   If you want to clean the junk file: make clean
+	2. The first input will be how many resource types are there in the simulation system
+	   Type a number and hit enter like:2, characters will be invalid input and broke the program.
+	3. The second input will be the detail of the Maximum resource quantity of each resource
+	   in the system.
+	   Type a series of number splited by space like: 2 2 3
+	4. The third input will be how many process are there in the simulation system.
+	   Type a number and hit enter like:2, characters will be invalid input and broke the program.
+	5. The fourth input will be the detail of the Maximum possible request of each process.But make
+	   sure this should be 
+	   Type a series of number splited by space like:P1:2 1 1
+													 P2:0 1 1
+													 P3:0 0 1
+
+***********************Note***************************
+
+1. I'll check the initial state using safety algorithm.
+   If the safety is not satisfied,I'll quit the program
+   by print the error message: Allocation Overflow.
+
+2. I'll check the safety inside, but instead of leting it quit
+   I'll just let one of processes release all their allocations.
+   With a inform message "Self Rescue!".
+
+3. Function Safety_checker referrenced from http://en.wikipedia.org/wiki/Banker%27s_algorithm

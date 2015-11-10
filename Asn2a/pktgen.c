@@ -69,7 +69,7 @@ int main( int argc, char ** argv)
 		Packet_ID++;
 		if (Packet_ID%2 == 0)
 		{
-			sleep(2);
+			sleep(1);
 		}
 		char buffer[32];
 		char* packet_ID = itoa(Packet_ID,buffer);
